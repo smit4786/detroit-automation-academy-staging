@@ -1239,19 +1239,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // Touch gets a 44px screen-space nearest fallback so finger taps are
   // forgiving at far zooms (mirrors the bus pillar fallback).
   var _stopV3 = null;
-  function pickStop(cx, cy, isTouch) {
-    if (!stopGroup || !stopGroup.visible || !stopPickList.length) return null;
-    var r = renderer.domElement.getBoundingClientRect();
-    pointerNDC.set(
-      ((cx - r.left) / r.width) * 2 - 1,
-      -(((cy - r.top) / r.height) * 2 - 1)
-    );
-    raycaster.setFromCamera(pointerNDC, camera);
-    var hits = raycaster.intersectObject(stopIM);
-    if (hits.length && hits[0].instanceId != null) {
-      return stopPickList[hits[0].instanceId] || null;
-    }
-    if (!isTouch) return null;
+  // Touch fallback: nearest stop center on screen within 44px. Split out so
+  // the tap handler can try the depth-ordered raycast first.
+  function pickStopScreen(cx, cy, r) {
     if (!_stopV3) _stopV3 = new THREE.Vector3();
     var sx = cx - r.left, sy = cy - r.top;
     var best = null, bestD = 44;
@@ -1265,6 +1255,62 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       if (d < bestD) { bestD = d; best = s; }
     }
     return best;
+  }
+  function pickStop(cx, cy, isTouch) {
+    if (!stopGroup || !stopGroup.visible || !stopPickList.length) return null;
+    var r = renderer.domElement.getBoundingClientRect();
+    pointerNDC.set(
+      ((cx - r.left) / r.width) * 2 - 1,
+      -(((cy - r.top) / r.height) * 2 - 1)
+    );
+    raycaster.setFromCamera(pointerNDC, camera);
+    var hits = raycaster.intersectObject(stopIM);
+    if (hits.length && hits[0].instanceId != null) {
+      return stopPickList[hits[0].instanceId] || null;
+    }
+    if (!isTouch) return null;
+    return pickStopScreen(cx, cy, r);
+  }
+  // Depth-ordered tap pick: buses and stops in ONE raycast so the visually
+  // frontmost marker wins. Previously buses were tested first and always won,
+  // even when a stop stood in front of the pillar (2026-10-06: tapping a stop
+  // overlapping a bus pillar could not select the stop).
+  function pickTopHit(cx, cy) {
+    var r = renderer.domElement.getBoundingClientRect();
+    pointerNDC.set(
+      ((cx - r.left) / r.width) * 2 - 1,
+      -(((cy - r.top) / r.height) * 2 - 1)
+    );
+    raycaster.setFromCamera(pointerNDC, camera);
+    var targets = [];
+    var busMeshCount = 0;
+    if (busMode) {
+      for (var i = 0; i < DETAIL_MAX; i++) {
+        var d = detailPool[i];
+        if (d && d.group.visible) { targets.push(d.body); busMeshCount++; }
+      }
+    } else {
+      targets.push(pillarBeaconIM, pillarGlowIM, pillarCoreIM);
+      busMeshCount = 3;
+    }
+    var stopMesh = null;
+    if (stopGroup && stopGroup.visible && stopPickList.length) {
+      stopMesh = stopIM; targets.push(stopIM);
+    }
+    if (!targets.length) return null;
+    var hits = raycaster.intersectObjects(targets);
+    if (!hits.length) return null;
+    var h = hits[0];
+    if (stopMesh && h.object === stopMesh) {
+      var st = (h.instanceId != null) ? (stopPickList[h.instanceId] || null) : null;
+      return st ? { kind: 'stop', stop: st } : null;
+    }
+    if (busMode) {
+      var veh = (h.object.userData.detail) ? h.object.userData.detail.vehicle : null;
+      return veh ? { kind: 'bus', vehicle: veh } : null;
+    }
+    var slot = (h.instanceId != null) ? busSlots[h.instanceId] : null;
+    return (slot && slot.vehicle) ? { kind: 'bus', vehicle: slot.vehicle } : null;
   }
   function pickBus(cx, cy, touchSlop) {
     var r = renderer.domElement.getBoundingClientRect();
@@ -1313,10 +1359,18 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var isTouch = e.pointerType === 'touch';
     if (dx * dx + dy * dy > (isTouch ? 169 : 36)) return; // was a drag (13px touch slop)
     if (tapHitsBusInfo(e.clientX, e.clientY)) { hideBus(); return; }
-    var v = pickBus(e.clientX, e.clientY, isTouch);
-    if (v) { showBus(v); return; }
-    var st = pickStop(e.clientX, e.clientY, isTouch);
-    if (st) { showStop(st); return; }
+    // Depth-ordered: one raycast across buses and stops, frontmost wins.
+    var hit = pickTopHit(e.clientX, e.clientY);
+    if (hit && hit.kind === 'bus') { showBus(hit.vehicle); return; }
+    if (hit && hit.kind === 'stop') { showStop(hit.stop); return; }
+    if (isTouch) {
+      // Raycast missed everything: nearest-on-screen fallbacks, as before.
+      var _r = renderer.domElement.getBoundingClientRect();
+      var _v = pickNearestScreen(e.clientX, e.clientY, _r);
+      if (_v) { showBus(_v); return; }
+      var _st = pickStopScreen(e.clientX, e.clientY, _r);
+      if (_st) { showStop(_st); return; }
+    }
     var pm = pickPMStation(e.clientX, e.clientY, isTouch);
     if (pm) { showStop(pm); return; }
     hideBus(); hideStop();
