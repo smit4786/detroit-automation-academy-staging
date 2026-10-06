@@ -234,7 +234,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
 
   // --- bus pillars: InstancedMesh, 4 draw calls total --------------------------
-  var PILLAR_H = 620;
+  // PILLAR_H capped at 280m (2026-10-06): true-scale landmark massing now
+  // occupies the skyline (RenCen 221m), so symbolic bus markers must read as
+  // markers, not as towers 3x the tallest building.
+  var PILLAR_H = 280;
   // Zoom-coupled marker scale: full-height symbolic pillars wide out, shrinking
   // as the camera dives so downtown stays intelligible at street zoom. The
   // handoff to true-scale bus models happens at ~2.6 km (updateLOD).
