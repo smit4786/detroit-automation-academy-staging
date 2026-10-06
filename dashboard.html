@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform status — Detroit Automation Academy</title>
+<meta name="description" content="Live status of Detroit Automation Academy platform systems: website, live transit map, bus data feed, and timing data.">
+<meta property="og:title" content="Platform status — Detroit Automation Academy">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/webp" href="./assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+<style>
+.status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 1.5rem; }
+.status-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.5rem; }
+.status-card h3 { margin: 0 0 .35rem; font-size: 1.05rem; }
+.status-card > p { color: #9AA0A6; font-size: .88rem; margin: 0 0 .9rem; }
+.pill { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; border-radius: 999px; padding: .35rem .8rem; border: 1px solid; }
+.pill.ok { color: #7ee2a8; border-color: rgba(126,226,168,.5); background: rgba(126,226,168,.08); }
+.pill.bad { color: #ff8f8f; border-color: rgba(255,143,143,.5); background: rgba(255,143,143,.08); }
+.pill.wait { color: #9AA0A6; border-color: rgba(154,160,166,.4); }
+.status-meta { color: #9AA0A6; font-size: .8rem; margin-top: .7rem; font-variant-numeric: tabular-nums; }
+.status-foot { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1.5rem; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="./" aria-label="Detroit Automation Academy home">
+    <img src="./assets/logo.webp" alt="" class="brand-mark">
+    <span class="brand-name">Detroit Automation Academy</span>
+  </a>
+  <nav class="nav-links" id="navLinks" aria-label="Primary">
+    <a href="./district.html">Try it</a>
+    <a href="./forge-line.html">Forge Line</a>
+    <a href="./live-transit.html">Live Transit</a>
+    <a href="./#mission">Mission</a>
+    <a href="./#programs">Programs</a>
+    <a href="./signal/">The Signal</a>
+    <a href="./engineering/">Engineering</a>
+    <a href="./voter-guide.html">Voter Guide</a>
+    <a href="./#partners">Partners</a>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<main id="top">
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">Platform status</p>
+      <h1>Systems, <span class="accent">live.</span></h1>
+      <div class="prose">
+        <p>Real-time status of the Academy's public platform systems, checked from your browser right now. Refreshes automatically every minute.</p>
+      </div>
+      <div class="status-grid" id="status-grid" aria-live="polite"></div>
+      <div class="status-foot">
+        <button class="btn btn-ghost" id="status-recheck">Recheck now</button>
+        <span class="status-meta" id="status-meta"></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Detroit Automation Academy — Where Detroit builds what's next.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var toggle = document.getElementById('navToggle');
+  var nav = document.getElementById('navLinks');
+  toggle.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+
+  var CHECKS = [
+    { id: 'site',    name: 'Website',          desc: 'Academy homepage and content pages', url: '/' },
+    { id: 'transit', name: 'Live Transit map', desc: '3D transit map application',         url: '/live-transit.html' },
+    { id: 'proxy',   name: 'Bus data feed',    desc: 'Live DDOT vehicle positions',        url: 'https://forge-line-live-proxy.netlify.app/api/vehicles', method: 'HEAD' },
+    { id: 'timing',  name: 'Timing data',      desc: 'Empirical segment timing dataset',   url: 'https://raw.githubusercontent.com/smit4786/forge-line-transit-data/main/data/timing/segments.json' }
+  ];
+  function check(c) {
+    var t0 = performance.now();
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 10000);
+    return fetch(c.url, { cache: 'no-store', signal: ctrl.signal, method: c.method || 'GET' })
+      .then(function (r) { return { ok: r.ok, ms: Math.round(performance.now() - t0) }; })
+      .catch(function () { return { ok: false, ms: Math.round(performance.now() - t0) }; })
+      .finally(function () { clearTimeout(timer); });
+  }
+  function render() {
+    var grid = document.getElementById('status-grid');
+    grid.innerHTML = '';
+    CHECKS.forEach(function (c) {
+      var d = document.createElement('div');
+      d.className = 'status-card';
+      d.id = 'st-' + c.id;
+      var h = document.createElement('h3'); h.textContent = c.name;
+      var p = document.createElement('p'); p.textContent = c.desc;
+      var pill = document.createElement('span'); pill.className = 'pill wait'; pill.textContent = 'checking…';
+      var meta = document.createElement('p'); meta.className = 'status-meta';
+      d.appendChild(h); d.appendChild(p); d.appendChild(pill); d.appendChild(meta);
+      grid.appendChild(d);
+    });
+    document.getElementById('status-meta').textContent = 'Checking…';
+    var done = 0, up = 0;
+    CHECKS.forEach(function (c) {
+      check(c).then(function (r) {
+        var d = document.getElementById('st-' + c.id);
+        var pill = d.querySelector('.pill');
+        pill.className = 'pill ' + (r.ok ? 'ok' : 'bad');
+        pill.textContent = r.ok ? 'operational' : 'unreachable';
+        d.querySelector('.status-meta').textContent = r.ms + ' ms';
+        done++; if (r.ok) up++;
+        if (done === CHECKS.length) {
+          document.getElementById('status-meta').textContent =
+            up + ' of ' + done + ' systems operational · checked ' + new Date().toLocaleTimeString();
+        }
+      });
+    });
+  }
+  document.getElementById('status-recheck').addEventListener('click', render);
+  render();
+  setInterval(render, 60000);
+})();
+</script>
+
+</body>
+</html>

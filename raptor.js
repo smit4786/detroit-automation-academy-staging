@@ -1,0 +1,346 @@
+/* raptor.js — client-side RAPTOR trip planner for Live Transit.
+ *
+ * Data: ddot-timetable-<version>.json (built by build-timetable.py from
+ * DDOT GTFS S1000182). Lazily imported only when the rider opens trip
+ * planning; the map's first load is untouched.
+ *
+ * Honesty: Phase 1 runs on scheduled times only. Phase 2b-i adds the live
+ * adjusted timetable: per poll, matched vehicles produce per-trip delays
+ * (setLiveDelays); plan() reads times through depA/arrA, which apply the
+ * L2 empirical baseline (when mature) and the L3 live delay shift. Legs
+ * carry provenance 'live'/'empirical'/'scheduled' plus delay metadata.
+ * No live feed → scheduled planner, exactly as Phase 1. RAPTOR itself
+ * (the rounds) is unchanged; it just sees adjusted times.
+ */
+var TT = null;
+var K_ROUNDS = 3; // max trips per journey => at most 2 transfers
+var INF = 1e15;
+var LIVE_FRESH_MS = 30 * 60 * 1000; // live delays only apply to near-term queries
+
+export async function loadTimetable(url) {
+  if (TT && TT.url === url) return TT;
+  var res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error('timetable fetch failed: HTTP ' + res.status);
+  var data = await res.json();
+  TT = buildIndex(data);
+  TT.url = url;
+  TT.meta = data.meta;
+  return TT;
+}
+
+function buildIndex(data) {
+  var patterns = [];
+  var pkey = new Map();
+  var trips = data.trips;
+  for (var ti = 0; ti < trips.length; ti++) {
+    var t = trips[ti];
+    var key = t.r + '|' + t.stops.join(',');
+    var pi = pkey.get(key);
+    if (pi === undefined) {
+      pi = patterns.length;
+      pkey.set(key, pi);
+      patterns.push({ route: t.r, stops: t.stops, trips: [] });
+    }
+    patterns[pi].trips.push(t);
+  }
+  for (var p = 0; p < patterns.length; p++) {
+    patterns[p].trips.sort(function (a, b) { return a.dep[0] - b.dep[0]; });
+  }
+  var nStops = 0, i, s;
+  for (i = 0; i < trips.length; i++) {
+    var st = trips[i].stops;
+    for (var j = 0; j < st.length; j++) if (st[j] + 1 > nStops) nStops = st[j] + 1;
+  }
+  for (i = 0; i < data.transfers.length; i++) {
+    var tr = data.transfers[i];
+    if (tr[0] + 1 > nStops) nStops = tr[0] + 1;
+    if (tr[1] + 1 > nStops) nStops = tr[1] + 1;
+  }
+  var stopPat = new Array(nStops);
+  patterns.forEach(function (pat, pi) {
+    for (var pos = 0; pos < pat.stops.length; pos++) {
+      s = pat.stops[pos];
+      (stopPat[s] || (stopPat[s] = [])).push([pi, pos]);
+    }
+  });
+  var adj = new Array(nStops);
+  for (i = 0; i < data.transfers.length; i++) {
+    var a = data.transfers[i][0], b = data.transfers[i][1], w = data.transfers[i][2];
+    (adj[a] || (adj[a] = [])).push([b, w]);
+    (adj[b] || (adj[b] = [])).push([a, w]);
+  }
+  return {
+    meta: data.meta, routes: data.routes, services: data.services,
+    exceptions: data.service_exceptions || [],
+    patterns: patterns, stopPat: stopPat, adj: adj, nStops: nStops
+  };
+}
+
+function fmtYMD(d) {
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate() + '';
+}
+
+function serviceFor(tt, ymd, dow) {
+  var mi = (dow + 6) % 7; // mask is Mon..Sun
+  var best = -1, i;
+  for (i = 0; i < tt.services.length; i++) {
+    var s = tt.services[i];
+    if (ymd >= s.start && ymd <= s.end && s.mask[mi]) best = i;
+  }
+  for (i = 0; i < tt.exceptions.length; i++) {
+    var e = tt.exceptions[i];
+    if (e.date === ymd) {
+      var si = -1;
+      for (var j = 0; j < tt.services.length; j++) {
+        if (tt.services[j].id === e.service) { si = j; break; }
+      }
+      if (e.added) best = si; else if (si === best) best = -1;
+    }
+  }
+  return best;
+}
+
+var MAX_WALK_SECS = 1800; // 30 min cumulative walk per round: transfers and
+// last-mile walks are minutes; anything longer is not a transit itinerary.
+function relaxWalk(tt, arr, wpar, wsec, seeds) {
+  var improved = new Set();
+  var q = seeds.slice(), inQ = new Set(seeds);
+  while (q.length) {
+    var s = q.shift(); inQ.delete(s);
+    if (wsec[s] >= MAX_WALK_SECS) continue;
+    var edges = tt.adj[s];
+    if (!edges) continue;
+    for (var i = 0; i < edges.length; i++) {
+      var t = edges[i][0], w = edges[i][1];
+      var nw = wsec[s] + w;
+      if (nw > MAX_WALK_SECS) continue;
+      var na = arr[s] + w;
+      if (na < arr[t]) {
+        arr[t] = na; wpar[t] = s; wsec[t] = nw; improved.add(t);
+        if (!inQ.has(t)) { q.push(t); inQ.add(t); }
+      }
+    }
+  }
+  return improved;
+}
+
+function fmtClock(sec) {
+  sec = Math.floor(sec) % 86400;
+  var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
+  var ap = h >= 12 ? 'PM' : 'AM', h12 = h % 12;
+  if (h12 === 0) h12 = 12;
+  return h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ap;
+}
+
+export function plan(tt, fromSeeds, toIdx, when) {
+  // fromSeeds: [{stop, walk}] — one tapped stop, or several nearby stops when
+  // the origin is the rider's location. A virtual walk leg is prepended for
+  // location origins so the journey always starts at the rider.
+  var seeds = (Array.isArray(fromSeeds) ? fromSeeds : [{ stop: fromSeeds, walk: 0 }])
+    .filter(function (fs) { return fs && fs.stop >= 0 && fs.stop < tt.nStops; });
+  var nS = tt.nStops;
+  var ymd = fmtYMD(when), dow = when.getDay();
+  var pd = new Date(when.getTime() - 86400000);
+  var svc = serviceFor(tt, ymd, dow);
+  var prevSvc = serviceFor(tt, fmtYMD(pd), pd.getDay());
+  var nowSec = when.getHours() * 3600 + when.getMinutes() * 60 + when.getSeconds();
+  if (svc < 0 && prevSvc < 0) {
+    return { journeys: [], meta: { reason: 'no-service', when: when } };
+  }
+  if (!seeds.length) {
+    return { journeys: [], meta: { reason: 'no-origin', when: when } };
+  }
+  if (seeds.some(function (fs) { return fs.stop === toIdx && !(fs.walk > 0); })) {
+    return { journeys: [], meta: { reason: 'same-stop', when: when } };
+  }
+
+  var seedOf = {}; // stop -> walk seconds from the origin point
+  var arrR = [], alight = [], walkPar = [];
+  // Phase 2b-i adjusted timetable: live delays apply only to near-term
+  // queries — a delay measured now says nothing about a trip planned for 8pm.
+  // Without fresh delays this is exactly the Phase 1 scheduled planner.
+  var liveDelays = tt.liveDelays || null;
+  var liveStamp = tt.liveStamp || 0;
+  var useLive = !!(liveDelays && liveStamp && Math.abs(when.getTime() - liveStamp) < LIVE_FRESH_MS);
+  var liveCtx = useLive ? { delays: liveDelays, stamp: liveStamp } : null;
+  function depA(t, pos) {
+    var d = (t.depL2 ? t.depL2[pos] : t.dep[pos]);
+    if (liveCtx) {
+      var ld = liveDelays.get(t);
+      if (ld && !ld.disrupted && ld.delaySec) d += ld.delaySec;
+    }
+    return d;
+  }
+  function arrA(t, pos) {
+    var a = (t.arrL2 ? t.arrL2[pos] : t.arr[pos]);
+    if (liveCtx) {
+      var ld = liveDelays.get(t);
+      if (ld && !ld.disrupted && ld.delaySec) a += ld.delaySec;
+    }
+    return a;
+  }
+  // round 0: origin seeds + walking
+  var arr0 = new Float64Array(nS).fill(INF);
+  var seedList = [];
+  seeds.forEach(function (fs) {
+    var t = nowSec + (fs.walk || 0);
+    if (t < arr0[fs.stop]) { arr0[fs.stop] = t; seedOf[fs.stop] = fs.walk || 0; }
+    seedList.push(fs.stop);
+  });
+  var w0 = new Array(nS).fill(null);
+  var ws0 = new Float64Array(nS).fill(INF);
+  seeds.forEach(function (fs) {
+    var w = fs.walk || 0;
+    if (w < ws0[fs.stop]) ws0[fs.stop] = w;
+  });
+  var imp0 = relaxWalk(tt, arr0, w0, ws0, seedList);
+  seedList.forEach(function (s) { imp0.add(s); });
+  arrR[0] = arr0; walkPar[0] = w0;
+  var markedPrev = imp0;
+
+  for (var k = 1; k <= K_ROUNDS; k++) {
+    var prevArr = arrR[k - 1];
+    var arr = Float64Array.from(prevArr);
+    var wpar = new Array(nS).fill(null);
+    var ali = new Array(nS).fill(null);
+    var improved = new Set();
+    markedPrev.forEach(function (p) {
+      var sps = tt.stopPat[p];
+      if (!sps) return;
+      for (var q = 0; q < sps.length; q++) {
+        var pi = sps[q][0], pos = sps[q][1];
+        var pat = tt.patterns[pi];
+        var trips = pat.trips;
+        for (var ti = 0; ti < trips.length; ti++) {
+          var t = trips[ti];
+          if (t.s !== svc && t.s !== prevSvc) continue;
+          if (depA(t, pos) < prevArr[p]) continue; // cannot catch
+          for (var j = pos + 1; j < pat.stops.length; j++) {
+            var s = pat.stops[j];
+            if (arrA(t, j) < arr[s]) {
+              arr[s] = arrA(t, j);
+              ali[s] = { trip: t, board: p, boardPos: pos, alightPos: j };
+              improved.add(s);
+            }
+          }
+        }
+      }
+    });
+    var ws = new Float64Array(nS).fill(INF);
+    improved.forEach(function (s) { ws[s] = 0; });
+    var wImp = relaxWalk(tt, arr, wpar, ws, Array.from(improved));
+    // A stop reached faster on foot was not reached by bus: drop the stale
+    // bus leg so the reconstruction follows the walk that actually won.
+    wImp.forEach(function (s) { improved.add(s); ali[s] = null; });
+    arrR[k] = arr; alight[k] = ali; walkPar[k] = wpar;
+    markedPrev = improved;
+  }
+
+  // reconstruct up to 3 journeys (best arrival per transfer count)
+  var journeys = [], seen = new Set();
+  for (var kk = 1; kk <= K_ROUNDS; kk++) {
+    if (arrR[kk][toIdx] >= INF / 2) continue;
+    var legs = buildJourney(tt, kk, toIdx, seedOf, alight, walkPar, liveCtx);
+    if (!legs || !legs.length) continue;
+    var nBus = legs.filter(function (l) { return l.type === 'bus'; }).length;
+    var key = Math.round(arrR[kk][toIdx]) + '|' + nBus;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    journeys.push(summarize(tt, legs, nowSec, arrR[kk][toIdx]));
+    if (journeys.length >= 3) break;
+  }
+  return {
+    journeys: journeys,
+    meta: {
+      when: when, service: svc >= 0 ? tt.services[svc].id : null,
+      feedVersion: tt.meta.feed_version, nowSec: nowSec
+    }
+  };
+}
+
+function walkSecs(tt, a, b) {
+  var edges = tt.adj[a] || [];
+  for (var i = 0; i < edges.length; i++) {
+    if (edges[i][0] === b) return edges[i][1];
+  }
+  return null;
+}
+
+function buildJourney(tt, k, target, seedOf, alight, walkPar, liveCtx) {
+  var legs = [], cur = target, kk = k, guard = 0;
+  while ((seedOf[cur] === undefined) && guard++ < 200) {
+    var a = (alight[kk] || [])[cur];
+    if (a) {
+      var t = a.trip, r = tt.routes[t.r];
+      var interp = t.interp.indexOf(a.boardPos) >= 0 || t.interp.indexOf(a.alightPos) >= 0;
+      var ld = liveCtx ? liveCtx.delays.get(t) : null;
+      var hasL2 = !!(t.depL2 && t.arrL2);
+      // Times as planned (adjusted when live/empirical). Provenance follows
+      // the strongest signal: live delay > empirical baseline > scheduled.
+      var bSec = (hasL2 ? t.depL2[a.boardPos] : t.dep[a.boardPos]);
+      var aSec = (hasL2 ? t.arrL2[a.alightPos] : t.arr[a.alightPos]);
+      if (ld && !ld.disrupted && ld.delaySec) { bSec += ld.delaySec; aSec += ld.delaySec; }
+      legs.unshift({
+        type: 'bus', routeId: r.id, routeName: r.name, color: r.color,
+        board: a.board, alight: cur,
+        boardSec: bSec, alightSec: aSec,
+        headsign: t.h || '', interp: interp,
+        provenance: (ld && !ld.disrupted) ? 'live' : (hasL2 ? 'empirical' : 'scheduled'),
+        delaySec: (ld && !ld.disrupted) ? ld.delaySec : 0,
+        delayStamp: (ld && !ld.disrupted) ? liveCtx.stamp : 0,
+        delayFixStamp: (ld && !ld.disrupted) ? (ld.fixStamp || 0) : 0,
+        disrupted: !!(ld && ld.disrupted),
+        tripRef: t // Phase 2c: identity key into the live delay/matcher state
+      });
+      cur = a.board; kk--;
+      if (kk < 0) return null;
+      continue;
+    }
+    var w = (walkPar[kk] || [])[cur];
+    if (w !== null && w !== undefined) {
+      legs.unshift({ type: 'walk', from: w, to: cur, secs: walkSecs(tt, w, cur) || 0 });
+      cur = w;
+      continue;
+    }
+    if (kk > 0) { kk--; continue; }
+    return null;
+  }
+  if (guard >= 200) return null;
+  // Prepend the virtual walk from the origin point (tapped stop: 0s and
+  // usually absorbed; your-location: the real first-mile walk).
+  if (seedOf[cur] !== undefined && seedOf[cur] > 0) {
+    legs.unshift({ type: 'walk', from: -1, to: cur, secs: seedOf[cur], fromLoc: true });
+  }
+  return legs;
+}
+
+function summarize(tt, legs, nowSec, arriveSec) {
+  var busLegs = legs.filter(function (l) { return l.type === 'bus'; });
+  var walkSecs = legs.reduce(function (s, l) { return s + (l.type === 'walk' ? l.secs : 0); }, 0);
+  var interp = busLegs.some(function (l) { return l.interp; });
+  return {
+    legs: legs,
+    nBus: busLegs.length,
+    departSec: nowSec,
+    arriveSec: arriveSec,
+    durationMin: Math.max(1, Math.round((arriveSec - nowSec) / 60)),
+    transfers: Math.max(0, busLegs.length - 1),
+    walkMin: Math.round(walkSecs / 60),
+    hasInterp: interp,
+    departClock: fmtClock(nowSec),
+    arriveClock: fmtClock(arriveSec)
+  };
+}
+
+export function fmtClockSec(sec) { return fmtClock(sec); }
+
+// Phase 2b-i: the live adjusted timetable. delayMap: Map(trip -> {delaySec,
+// disrupted, vehicleId}). Delays shift a trip's remaining times; disrupted
+// trips are never shifted. Stored on the tt object; plan() applies them.
+export function setLiveDelays(tt, delayMap, stampMs) {
+  tt.liveDelays = delayMap;
+  tt.liveStamp = stampMs;
+}
+
+// Exported for the client-side trip matcher (Phase 2b-i).
+export { serviceFor };

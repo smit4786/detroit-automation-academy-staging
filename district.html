@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>3D Training District — Detroit Automation Academy — Where Detroit Builds What's Next</title>
+<meta name="description" content="Robotics, drones, and automation training for Detroit's young builders — from first circuit to first career.">
+<link rel="icon" type="image/webp" href="assets/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#demo">Skip to main content</a>
+
+<header class="nav">
+  <a class="brand" href="index.html" aria-label="Detroit Automation Academy home">
+    <img src="assets/logo.webp" alt="" class="brand-mark">
+    <span class="brand-word">Detroit Automation <em>Academy</em></span>
+  </a>
+  <nav class="nav-links" id="navLinks" aria-label="Primary">
+    <a href="./district.html">Try it</a>
+    <a href="./forge-line.html">Forge Line</a>
+    <a href="./live-transit.html">Live Transit</a>
+    <a href="./#mission">Mission</a>
+    <a href="./#programs">Programs</a>
+    <a href="./signal/">The Signal</a>
+    <a href="./engineering/">Engineering</a>
+    <a href="./voter-guide.html">Voter Guide</a>
+    <a href="./#partners">Partners</a>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<main>
+<section class="section section-alt" id="demo" aria-labelledby="demo-heading">
+    <div class="wrap">
+      <p class="kicker">Try it</p>
+      <h2 id="demo-heading">Type a command. <span class="accent">Watch it move.</span></h2>
+      <div class="prose">
+        <p>This is what day one feels like at the academy: you tell a machine what to do, and it does it. The training bot is listening &mdash; go ahead. Drag to orbit the 3D training district, tap a building to visit it, drive with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> on desktop or the D-pad on touch. Type &ldquo;takeoff&rdquo; and it flies as a quadcopter &mdash; the same controls steer it in the air.</p>
+      </div>
+      <div class="demo" id="demoFull">
+        <div class="demo-stage" id="demoStage">
+          <div id="world3d" class="world3d" role="img" aria-label="Interactive 3D training district. Drag to orbit, scroll to zoom, tap a building to visit it.">
+            <div class="world3d-loading"><span></span>Building the district <b class="world3d-count"></b>&hellip;</div>
+          </div>
+          <button type="button" class="demo-fullscreen" id="demoFullscreen" aria-label="View the 3D district full screen">&#9974; Full screen</button>
+          <svg class="demo-bot" id="demoBot" viewBox="0 0 220 220" role="img" aria-label="A small orange training robot that responds to typed commands">
+            <ellipse cx="110" cy="198" rx="54" ry="10" class="bot-shadow"/>
+            <g class="bot-body">
+              <circle cx="88" cy="178" r="15" class="bot-wheel"/>
+              <circle cx="132" cy="178" r="15" class="bot-wheel"/>
+              <rect x="52" y="104" width="12" height="46" rx="6" class="bot-arm"/>
+              <g class="bot-arm-wave">
+                <rect x="156" y="104" width="12" height="46" rx="6" class="bot-arm"/>
+              </g>
+              <rect x="68" y="92" width="84" height="72" rx="20" class="bot-torso"/>
+              <rect x="94" y="114" width="32" height="24" rx="7" class="bot-panel"/>
+              <circle cx="110" cy="126" r="5" class="bot-light"/>
+              <rect x="72" y="36" width="76" height="62" rx="26" class="bot-head"/>
+              <circle cx="96" cy="66" r="9" class="bot-eye"/>
+              <circle cx="124" cy="66" r="9" class="bot-eye"/>
+              <line x1="110" y1="36" x2="110" y2="18" class="bot-antenna"/>
+              <circle cx="110" cy="14" r="6" class="bot-eye"/>
+              <polygon points="148,66 214,34 214,98" class="scan-beam"/>
+            </g>
+          </svg>
+        </div>
+        <div class="demo-term">
+          <button type="button" class="demo-term-toggle" id="demoTermToggle" aria-expanded="true" aria-label="Collapse terminal panel">&#9662; Terminal</button>
+          <div class="demo-log" id="demoLog" aria-live="polite" aria-label="Command output"></div>
+          <form class="demo-input-row" id="demoForm">
+            <span class="demo-prompt" aria-hidden="true">&gt;</span>
+            <input id="demoInput" type="text" aria-label="Type a command" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="look, dance, map, help…" maxlength="24">
+          </form>
+          <div class="demo-chips">
+            <div class="dpad" role="group" aria-label="Drive the bot">
+              <button type="button" class="demo-chip dpad-btn dpad-up" data-drive="0,-1" aria-label="Drive forward">&#9650;</button>
+              <button type="button" class="demo-chip dpad-btn dpad-left" data-drive="-1,0" aria-label="Drive left">&#9664;</button>
+              <button type="button" class="demo-chip dpad-btn dpad-down" data-drive="0,1" aria-label="Drive backward">&#9660;</button>
+              <button type="button" class="demo-chip dpad-btn dpad-right" data-drive="1,0" aria-label="Drive right">&#9654;</button>
+            </div>
+            <button type="button" class="demo-chip" data-cmd="spin">spin</button>
+            <button type="button" class="demo-chip" data-cmd="dance">dance</button>
+            <button type="button" class="demo-chip" data-cmd="look">look</button>
+            <button type="button" class="demo-chip" data-cmd="focus">focus</button>
+            <button type="button" class="demo-chip" data-cmd="takeoff">takeoff</button>
+            <button type="button" class="demo-chip" data-cmd="land">land</button>
+            <button type="button" class="demo-chip" data-cmd="scan">scan</button>
+            <button type="button" class="demo-chip" data-cmd="wave">wave</button>
+            <button type="button" class="demo-chip" data-cmd="up">up</button>
+            <button type="button" class="demo-chip" data-cmd="down">down</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="assets/logo.webp" alt="" class="brand-mark">
+      <span>Detroit Automation Academy</span>
+    </div>
+    <p class="footer-line">Built without funding. Finished on principle.</p>
+    <p class="footer-fine">© 2026 Detroit Automation Academy · Detroit, Michigan</p>
+  </div>
+</footer>
+
+<script src="script.js?v=20261003-1330"></script>
+<script src="arch-kit.js?v=20261001-0142" defer></script>
+<script src="streetscape.js?v=20261001-0142" defer></script>
+<script src="furniture.js?v=20261001-0142" defer></script>
+<script src="vehicles.js?v=20261001-0142" defer></script>
+<script src="district-expansion.js?v=20261001-0142" defer></script>
+<script src="groundwork.js?v=20261001-0142" defer></script>
+<script src="promenade.js?v=20261001-0142" defer></script>
+<script src="region-expansion.js?v=20261001-local" defer></script>
+<script src="chicago-hsr.js?v=20261001-local" defer></script>
+<script src="railways.js?v=20261001-local" defer></script>
+<script src="region-expansion-r4.js?v=20261001-local" defer></script>
+<script src="region-expansion-r5.js?v=20261003-1330" defer></script>
+<script src="heritage-car.js?v=20261001-local" defer></script>
+<script src="rail-vehicles.js?v=20261001-local" defer></script>
+<script src="drone-variants.js?v=20261001-local" defer></script>
+<script src="drone-autonomy.js?v=20261001-local" defer></script>
+<script src="rail-multilevel.js?v=20261001-local" defer></script>
+<script src="stability.js?v=20261001-local" defer></script>
+<script src="world3d.js?v=20261001-0142" defer></script>
+<script src="owner.js" defer></script>
+</body>
+</html>
