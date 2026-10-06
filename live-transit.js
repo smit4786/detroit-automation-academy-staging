@@ -751,6 +751,87 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
   // Eased camera flight: position + target glide together over ~1.4 s.
   // The user's grab always wins — pointerdown cancels the flight instantly.
+  // --- DisplayBounds: device-specific visible-map framing --------------------
+  // The map canvas (#live-map) is full-viewport with UI chrome overlaid. This
+  // module measures the actually-visible map region ("safe frame") by
+  // subtracting the screen rects of visible chrome elements. Phase 2's
+  // transition engine will frame subjects inside the safe frame so the camera
+  // never lands a subject under a card or panel.
+  //
+  // Phase 1: measurement only. Nothing consumes the safe frame yet. The API
+  // is exposed as window.__db() for verification.
+  var DisplayBounds = (function () {
+    'use strict';
+    var MOBILE_MAX_W = 768;
+
+    function isShown(el) {
+      if (!el || el.hidden) return false;
+      var r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }
+    // Registry: chrome element -> viewport edge it docks to per device class.
+    // 'modal' = centered overlay; when any modal is open the safe frame is
+    // degenerate and callers must dismiss it before transitioning.
+    var registry = [
+      { sel: 'header.nav', edge: { mobile: 'top', desktop: 'top' }, visible: isShown },
+      { id: 'bus-card', edge: { mobile: 'bottom', desktop: 'left' }, visible: isShown },
+      { id: 'stop-card', edge: { mobile: 'bottom', desktop: 'left' }, visible: isShown },
+      { id: 'trip-card', edge: { mobile: 'bottom', desktop: 'right' }, visible: isShown },
+      { id: 'trip-planner', edge: { mobile: 'bottom', desktop: 'right' }, visible: isShown },
+      { id: 'filter-panel', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'browse-panel', edge: { mobile: 'modal', desktop: 'modal' }, visible: isShown },
+      { id: 'nav-overlay', edge: { mobile: 'modal', desktop: 'modal' }, visible: isShown },
+      { id: 'map-hint', edge: { mobile: 'bottom', desktop: 'bottom' }, visible: isShown },
+      { id: 'zoom-in', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'zoom-out', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'view-locate', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'view-reset', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'view-full', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'browse-toggle', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'filter-btn', edge: { mobile: 'right', desktop: 'right' }, visible: isShown },
+      { id: 'trip-btn', edge: { mobile: 'right', desktop: 'right' }, visible: isShown }
+    ];
+
+    function get() {
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var dc = vw < MOBILE_MAX_W ? 'mobile' : 'desktop';
+      var insets = { top: 0, left: 0, right: 0, bottom: 0 };
+      var modalOpen = false;
+      var parts = [];
+      for (var i = 0; i < registry.length; i++) {
+        var e = registry[i];
+        var el = e.id ? document.getElementById(e.id) : document.querySelector(e.sel);
+        if (!el || !e.visible(el)) continue;
+        var r = el.getBoundingClientRect();
+        var edge = e.edge[dc];
+        if (edge === 'modal') { modalOpen = true; parts.push({ id: e.id || e.sel, edge: 'modal' }); continue; }
+        var extent = edge === 'top' ? r.bottom
+          : edge === 'left' ? r.right
+          : edge === 'right' ? vw - r.left
+          : vh - r.top; // bottom
+        extent = Math.max(0, Math.round(extent));
+        if (extent > insets[edge]) insets[edge] = extent;
+        parts.push({ id: e.id || e.sel, edge: edge, extent: extent });
+      }
+      var sf = {
+        x: insets.left, y: insets.top,
+        w: Math.max(0, vw - insets.left - insets.right),
+        h: Math.max(0, vh - insets.top - insets.bottom)
+      };
+      return {
+        vw: vw, vh: vh, deviceClass: dc,
+        insets: insets, modalOpen: modalOpen,
+        safeFrame: sf,
+        center: { x: Math.round(sf.x + sf.w / 2), y: Math.round(sf.y + sf.h / 2) },
+        _parts: parts
+      };
+    }
+
+    return { get: get, MOBILE_MAX_W: MOBILE_MAX_W };
+  })();
+  // Verification hook (Phase 1): window.__db() returns the live measurement.
+  window.__db = function () { return DisplayBounds.get(); };
+
   function glideTo(pos, tgt, dur) {
     streetTween = {
       t0: performance.now(), dur: dur || 1400,
