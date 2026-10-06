@@ -271,6 +271,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
     BUS_MAX);
   var pillarMeshes = [pillarGlowIM, pillarCoreIM, pillarBeaconIM, pillarRingIM];
+  // Uncertainty halo: one soft disc per bus, radius = 3σ of the Kalman
+  // position variance. Additive, subtle — it reads as "confidence," not geometry.
+  var haloIM = new THREE.InstancedMesh(
+    new THREE.CircleGeometry(1, 24),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+    BUS_MAX);
+  haloIM.frustumCulled = false;
+  haloIM.renderOrder = 4;
+  pillarMeshes.push(haloIM);
 
   // Per-bus route badges: number-only chips. Destinations live in the bus
   // card (title + Destination row) — the floating badge stays compact.
@@ -613,6 +622,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     _s3.set(exz * 1.35, exz * 1.35, 1);
     _m4.compose(_p3, _ringQ, _s3);
     pillarRingIM.setMatrixAt(k, _m4);
+    // Uncertainty halo: flat disc at y=8, scaled to the 3σ radius.
+    var hr = b.haloR || 15;
+    _p3.set(b.x, 8, b.z);
+    _q3.identity();
+    _s3.set(hr, hr, 1);
+    _m4.compose(_p3, _ringQ, _s3);
+    haloIM.setMatrixAt(k, _m4);
   }
 
   function renderBusInstances() {
@@ -3526,6 +3542,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   var PREDICT_HORIZON_S = 150; // never dead-reckon on a fix older than this
   var SNAP_DIST_M = 200;       // along-track divergence above this = teleport
   var OFFSHAPE_M = 150;        // cross-track beyond this = detour, render raw
+  // Kalman filter noise model. R = GPS measurement variance (15m sigma).
+  // Q_* are process-noise densities; replaced by Bayesian timing-cell
+  // posteriors when telemetry-math/bayesian_cells.py lands in the pipeline.
+  var KALMAN_R = 225, KALMAN_Q_POS = 2.0, KALMAN_Q_VEL = 0.5;
 
   function shapeArcs(routeId) {
     var hit = shapeArcCache[routeId];
@@ -3618,29 +3638,29 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       if (!tr || !tr.arc) continue;
       var moved = false;
       var ageS = (now - tr.fixT) / 1000;
-      if (ageS < PREDICT_HORIZON_S) {
-        // Conservative mean reversion: decay toward the empirical segment
-        // speed, but only downward — never invent acceleration. A cruising
-        // bus keeps its reported speed; a fast-reported bus entering a
-        // habitually slow segment eases toward the segment mean.
-        if (!tr.seg || tr.segPath !== tr.pathIdx || tr.s < tr.seg.s0 || tr.s > tr.seg.s1) {
-          tr.seg = segmentAt(tr.routeId, tr.pathIdx, tr.s);
+      if (ageS < PREDICT_HORIZON_S && tr.kInit) {
+        // Kalman predict: constant-velocity model, F = [[1,dt],[0,1]].
+        // The empirical segment speed enters as a velocity prior (the old
+        // mean-reversion, now inside the filter instead of beside it).
+        if (!tr.seg || tr.segPath !== tr.pathIdx || tr.kS < tr.seg.s0 || tr.kS > tr.seg.s1) {
+          tr.seg = segmentAt(tr.routeId, tr.pathIdx, tr.kS);
           tr.segPath = tr.pathIdx;
         }
         var v0 = tr.speedMps;
         var vEmp = empiricalSpeed(tr.routeId, tr.seg);
-        var vInf = (vEmp != null && vEmp < v0) ? vEmp : v0;
-        var vEff = vInf + (v0 - vInf) * Math.exp(-ageS / REVERT_TAU_S);
-        if (vEff > 0.3) {
-          tr.s = Math.max(0, Math.min(tr.arc.len, tr.s + vEff * dt));
+        var vPrior = (vEmp != null && vEmp < v0) ? vEmp : v0;
+        // Ease the velocity state toward the prior (never invent accel).
+        tr.kV += (vPrior - tr.kV) * (1 - Math.exp(-dt / REVERT_TAU_S));
+        tr.kS += tr.kV * dt;
+        // Covariance predict: P = F*P*F' + Q*dt.
+        var p00 = tr.kP, p01 = tr.kPvS, p11 = tr.kPv;
+        tr.kP = p00 + 2 * dt * p01 + dt * dt * p11 + KALMAN_Q_POS * dt;
+        tr.kPvS = p01 + dt * p11;
+        tr.kPv = p11 + KALMAN_Q_VEL * dt;
+        if (Math.abs(tr.kV) > 0.3 || tr.kP > KALMAN_R * 4) {
+          tr.s = Math.max(0, Math.min(tr.arc.len, tr.kS));
           moved = true;
         }
-      }
-      if (Math.abs(tr.sCorr) > 0.05) {
-        var k = Math.min(1, dt * 1.8);
-        tr.s = Math.max(0, Math.min(tr.arc.len, tr.s + tr.sCorr * k));
-        tr.sCorr *= (1 - k);
-        moved = true;
       }
       if (moved) {
         anyMoved = true;
@@ -3649,6 +3669,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         sl.rotY = Math.atan2(-pt.dz, pt.dx);
         var sp = badgePool[i];
         if (sp && sp.visible) { sp.position.x = pt.x; sp.position.z = pt.z; }
+        // Uncertainty halo: radius = 3σ of the position variance, clamped.
+        // Grows between fixes, collapses on the Kalman update — the honest
+        // rendering of "we're less sure where this bus is."
+        sl.haloR = Math.max(15, Math.min(150, 3 * Math.sqrt(Math.max(tr.kP, 1))));
       }
     }
     if (!anyMoved) return;
@@ -4125,17 +4149,41 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
           id: v.vehicle_id, routeId: v.route_id,
           arc: null, pathIdx: -1, s: 0, sCorr: 0,
           speedMps: 0, fixT: 0, lastX: null, lastZ: null, init: false,
-          bornSeq: pollSeq, vehicle: null
+          bornSeq: pollSeq, vehicle: null,
+          // Kalman state: [kS arc-pos, kV velocity]; kP/kPv/kPvS covariance.
+          // Replaces the ad-hoc sCorr easing with optimal gains; snap logic
+          // below stays as the outlier gate. Q_* defaults until the Bayesian
+          // timing cells land (telemetry-math/bayesian_cells.py).
+          kS: 0, kV: 0, kP: 225, kPv: 25, kPvS: 0, kInit: false
         };
       }
       tr.vehicle = v; // fresh record each poll (destination, updated_at)
       var m = matchFix(v.route_id, p[0], p[1], v.bearing, tr.arc ? tr : null);
       if (m && m.dist <= OFFSHAPE_M) {
-        if (tr.arc && tr.pathIdx === m.pathIdx) {
-          var delta = m.s - tr.s;
-          if (Math.abs(delta) > SNAP_DIST_M) { tr.s = m.s; tr.sCorr = 0; }
-          else tr.sCorr += delta;
+        if (tr.arc && tr.pathIdx === m.pathIdx && tr.kInit) {
+          var delta = m.s - tr.kS;
+          if (Math.abs(delta) > SNAP_DIST_M) {
+            // Outlier gate: snap and reinit the filter (a plain Kalman
+            // filter is not robust to GPS jumps; the gate keeps it honest).
+            tr.kS = m.s; tr.kV = tr.speedMps; tr.kP = KALMAN_R; tr.kPv = 25; tr.kPvS = 0;
+          } else {
+            // Kalman update: H = [1, 0], R = GPS variance. Optimal gain —
+            // replaces the old sCorr easing with the MMSE correction.
+            var Sk = tr.kP + KALMAN_R;
+            var kk0 = tr.kP / Sk, kk1 = tr.kPvS / Sk;
+            tr.kS += kk0 * delta;
+            tr.kV += kk1 * delta;
+            var nkP = tr.kP - kk0 * tr.kP;
+            var nkPvS = tr.kPvS - kk0 * tr.kPvS;
+            tr.kPv = tr.kPv - kk1 * tr.kPvS;
+            tr.kP = nkP; tr.kPvS = nkPvS;
+          }
+          // Keep the filtered state on the arc.
+          if (tr.arc) tr.kS = Math.max(0, Math.min(tr.arc.len, tr.kS));
+          tr.s = tr.kS; tr.sCorr = 0; // render from the filtered state
         } else {
+          tr.kS = m.s; tr.kV = tr.speedMps; tr.kP = KALMAN_R; tr.kPv = 25; tr.kPvS = 0;
+          tr.kInit = true;
           tr.s = m.s; tr.sCorr = 0; // new / re-matched path: snap
         }
         tr.arc = m.arc; tr.pathIdx = m.pathIdx;
