@@ -210,6 +210,19 @@
   .bus-card dd { margin: 0; color: #F5F2EA; font-variant-numeric: tabular-nums; }
   .bus-card .close { position: absolute; top: .5rem; right: .6rem; background: none; border: none; color: #9AA0A6; font-size: 1.1rem; cursor: pointer; line-height: 1; padding: .25rem; }
   .bus-card .close:hover { color: #F5F2EA; }
+  /* D1a: mobile compact bar — the card opens collapsed to route + vehicle. */
+  .bus-compactbar { display: none; }
+  #bus-card.compact .bus-compactbar { display: flex; align-items: center; gap: .6rem; }
+  #bus-card.compact .sel-eyebrow, #bus-card.compact h2, #bus-card.compact dl, #bus-card.compact .bus-actions { display: none; }
+  .bus-expand { display: flex; align-items: center; gap: .5rem; background: none; border: none; color: #F5F2EA; font: inherit; cursor: pointer; padding: .25rem; min-width: 0; flex: 1; text-align: left; touch-action: manipulation; }
+  .bus-expand i { width: .8rem; height: .8rem; border-radius: 3px; display: inline-block; flex: none; }
+  .bus-compact-text { display: flex; flex-direction: column; min-width: 0; }
+  #bus-compact-title { font-family: "Space Grotesk", sans-serif; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #bus-compact-id { font-size: .78rem; color: #9AA0A6; }
+  .bus-expand-hint { color: #9AA0A6; flex: none; }
+  .bus-follow-btn { flex: none; background: rgba(255,176,0,.14); border: 1px solid rgba(255,176,0,.55); color: #FFB000; border-radius: 999px; padding: .45rem .9rem; font: inherit; font-size: .85rem; cursor: pointer; touch-action: manipulation; min-height: 44px; }
+  .bus-follow-btn[aria-pressed="true"] { background: #FFB000; color: #0C1116; }
+  .bus-actions { margin: 0 0 .6rem; }
   /* Trip planner (RAPTOR): same card language as BUS/STOP. */
   #trip-card { top: auto; bottom: 4.5rem; }
   #trip-card[hidden] #trip-planner, #trip-card[hidden] #trip-search { display: none; }
@@ -407,8 +420,17 @@
       </div>
       <div class="bus-card" id="bus-card" hidden>
         <button class="close" id="bus-close" aria-label="Close bus details">×</button>
+        <div class="bus-compactbar" id="bus-compactbar">
+          <button class="bus-expand" id="bus-expand" aria-label="Expand bus details">
+            <i id="bus-chip-c"></i>
+            <span class="bus-compact-text"><span id="bus-compact-title">Bus</span><span id="bus-compact-id">–</span></span>
+            <span class="bus-expand-hint" aria-hidden="true">▾</span>
+          </button>
+          <button class="bus-follow-btn" type="button" aria-pressed="false">Follow</button>
+        </div>
         <div class="sel-eyebrow">Bus</div>
         <h2><i id="bus-chip"></i><span id="bus-title">Bus</span></h2>
+        <div class="bus-actions"><button class="bus-follow-btn" type="button" aria-pressed="false">Follow</button></div>
         <dl>
           <dt>Vehicle</dt><dd id="bus-id">–</dd>
           <dt>Destination</dt><dd id="bus-dest">–</dd>
@@ -524,7 +546,7 @@
 <script>
   window.FORGE_LIVE_PROXY = "https://forge-line-live-proxy.netlify.app";
 </script>
-<script type="module" src="live-transit.js?v=20261006-1520"></script>
+<script type="module" src="live-transit.js?v=20261006-1535"></script>
 <script>
   // Minimal nav toggle (mirrors index behavior for this standalone page)
   (function () {
