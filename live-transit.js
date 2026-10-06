@@ -234,10 +234,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
 
   // --- bus pillars: InstancedMesh, 4 draw calls total --------------------------
-  // PILLAR_H capped at 280m (2026-10-06): true-scale landmark massing now
-  // occupies the skyline (RenCen 221m), so symbolic bus markers must read as
-  // markers, not as towers 3x the tallest building.
-  var PILLAR_H = 280;
+  // Marker assembly redesigned 2026-10-06 for the true-scale skyline
+  // (landmark massing: RenCen 221m). The full stack — glow, core, beacon
+  // ("ceiling"), ground ring ("floor"), badges — is sized as one coherent
+  // marker language: visible at wide zoom, subordinate to the towers,
+  // compact at street zoom. Nothing in the assembly exceeds ~265m.
+  var PILLAR_H = 220;
   // Zoom-coupled marker scale: full-height symbolic pillars wide out, shrinking
   // as the camera dives so downtown stays intelligible at street zoom. The
   // handoff to true-scale bus models happens at ~2.6 km (updateLOD).
@@ -253,19 +255,19 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     return lo + (1 - lo) * t;
   }
   var pillarGlowIM = new THREE.InstancedMesh(
-    new THREE.CylinderGeometry(58, 58, PILLAR_H, 12, 1, true),
+    new THREE.CylinderGeometry(36, 36, PILLAR_H, 12, 1, true),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
     BUS_MAX);
   var pillarCoreIM = new THREE.InstancedMesh(
-    new THREE.CylinderGeometry(20, 27, PILLAR_H, 10),
+    new THREE.CylinderGeometry(12, 16, PILLAR_H, 10),
     new THREE.MeshLambertMaterial({}),
     BUS_MAX);
   var pillarBeaconIM = new THREE.InstancedMesh(
-    new THREE.SphereGeometry(64, 16, 12),
+    new THREE.SphereGeometry(20, 16, 12),
     new THREE.MeshBasicMaterial({}),
     BUS_MAX);
   var pillarRingIM = new THREE.InstancedMesh(
-    new THREE.RingGeometry(72, 124, 28),
+    new THREE.RingGeometry(20, 36, 28),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
     BUS_MAX);
   var pillarMeshes = [pillarGlowIM, pillarCoreIM, pillarBeaconIM, pillarRingIM];
@@ -385,8 +387,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         // with the badge without covering the pillar. Tracks the zoom-coupled
         // pillar height (busMode uses true-scale models instead). Scale eases
         // per frame with the badges so the card glides instead of stepping.
-        var y = busMode ? 150 : Math.max(120, PILLAR_H * pillarYS - 80);
-        busInfoSprite.position.set(s.x + 420, y, s.z);
+        var y = busMode ? 150 : Math.max(60, PILLAR_H * pillarYS - 40);
+        busInfoSprite.position.set(s.x + 200, y, s.z);
         if (busInfoSprite.userData.aspect) {
           var ih = badgeHeight() * 1.15;
           busInfoSprite.scale.set(ih * busInfoSprite.userData.aspect, ih, 1);
@@ -604,10 +606,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     _m4.compose(_p3, _q3, _s3);
     pillarGlowIM.setMatrixAt(k, _m4);
     pillarCoreIM.setMatrixAt(k, _m4);
-    _p3.set(b.x, topY + 40, b.z);
+    _p3.set(b.x, topY + 24, b.z);
     _m4.compose(_p3, _q3, _s3);
     pillarBeaconIM.setMatrixAt(k, _m4);
-    _p3.set(b.x, 6, b.z);
+    _p3.set(b.x, 4, b.z);
     _s3.set(exz * 1.35, exz * 1.35, 1);
     _m4.compose(_p3, _ringQ, _s3);
     pillarRingIM.setMatrixAt(k, _m4);
@@ -666,7 +668,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       im.instanceMatrix.needsUpdate = true;
     });
     markColorsDirty();
-    updateBusBadges(n, PILLAR_H * pillarYS + 360);
+    updateBusBadges(n, PILLAR_H * pillarYS + 80);
   }
 
   // Per-bus route badges: one sprite per bus, shown only at close street-level zooms.
@@ -706,7 +708,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // Visibility/texture assignment stays in updateBusBadges (data updates).
   function smoothBadges() {
     var h = badgeHeight();
-    var yBase = busMode ? 430 : PILLAR_H * pillarYS + 360;
+    var yBase = busMode ? 150 : PILLAR_H * pillarYS + 80;
     for (var i = 0; i < badgePool.length; i++) {
       var sp = badgePool[i];
       if (!sp.visible || !sp.userData.aspect) continue;
@@ -1065,7 +1067,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     }
     for (var k = 0; k < busSlots.length; k++) writeBusMatrices(k, busSlots[k], 1);
     pillarMeshes.forEach(function (im) { im.instanceMatrix.needsUpdate = true; });
-    updateBusBadges(busSlots.length, PILLAR_H * pillarYS + 360);
+    updateBusBadges(busSlots.length, PILLAR_H * pillarYS + 80);
   }
 
   // Zoom-coupled stop scale, eased every frame like the pillars. Matrix-only
@@ -1119,7 +1121,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         if (_p3.z > 1 || _p3.z < -1) continue;
         var ax = (_p3.x * 0.5 + 0.5) * r.width + r.left;
         var ay = (-_p3.y * 0.5 + 0.5) * r.height + r.top;
-        _p3.set(s.x, PILLAR_H * pillarYS + 40, s.z).project(camera);
+        _p3.set(s.x, PILLAR_H * pillarYS + 48, s.z).project(camera);
         if (_p3.z > 1 || _p3.z < -1) continue;
         var bx = (_p3.x * 0.5 + 0.5) * r.width + r.left;
         var by = (-_p3.y * 0.5 + 0.5) * r.height + r.top;
