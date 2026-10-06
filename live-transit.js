@@ -831,6 +831,20 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   })();
   // Verification hook (Phase 1): window.__db() returns the live measurement.
   window.__db = function () { return DisplayBounds.get(); };
+  // STAGING-ONLY debug readout: ?dbdebug=1 renders the live DisplayBounds
+  // measurement into the DOM so script-less verification can read it.
+  // Never ship this block to production.
+  if (/[?&]dbdebug=1/.test(location.search)) {
+    (function () {
+      var pre = document.createElement('pre');
+      pre.id = 'db-debug';
+      pre.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9999;max-width:92vw;max-height:40vh;overflow:auto;background:rgba(0,0,0,.85);color:#0f0;font:11px/1.4 monospace;padding:8px;white-space:pre-wrap;';
+      document.body.appendChild(pre);
+      setInterval(function () {
+        try { pre.textContent = JSON.stringify(DisplayBounds.get(), null, 1); } catch (e) { /* keep last */ }
+      }, 500);
+    })();
+  }
 
   function glideTo(pos, tgt, dur) {
     streetTween = {
