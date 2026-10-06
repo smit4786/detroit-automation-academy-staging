@@ -846,11 +846,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     })();
   }
 
-  function glideTo(pos, tgt, dur) {
+  function glideTo(pos, tgt, dur, onDone) {
     streetTween = {
       t0: performance.now(), dur: dur || 1400,
       fromPos: camera.position.clone(), toPos: pos.clone(),
-      fromTgt: controls.target.clone(), toTgt: tgt.clone()
+      fromTgt: controls.target.clone(), toTgt: tgt.clone(),
+      onDone: (typeof onDone === 'function') ? onDone : null
     };
     controls.enabled = false;
   }
@@ -860,18 +861,80 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     camera.position.lerpVectors(streetTween.fromPos, streetTween.toPos, e);
     controls.target.lerpVectors(streetTween.fromTgt, streetTween.toTgt, e);
-    if (t >= 1) { streetTween = null; if (!tripFly) controls.enabled = true; }
+    if (t >= 1) {
+      var done = streetTween.onDone;
+      streetTween = null;
+      if (!tripFly) controls.enabled = true;
+      // Only a naturally completed glide runs its follow directive; a
+      // cancelled glide (pointerdown / programmatic move) never does.
+      if (done) { try { done(); } catch (err) {} }
+    }
   }
   // Programmatic camera moves (reset, locate) cancel any in-flight glide so
   // they don't fight over the camera.
   function cancelStreetTween() {
     if (streetTween) { streetTween = null; if (!tripFly) controls.enabled = true; }
     followVId = null; // any programmatic move also ends bus tracking
+    refreshFollowBtn();
   }
   renderer.domElement.addEventListener('pointerdown', function () {
     if (streetTween) { streetTween = null; if (!tripFly) controls.enabled = true; }
-    followVId = null; // user takes the camera: stop tracking the bus
+    setFollow(null); // user takes the camera: stop tracking the bus
   });
+  // --- TransitionEngine (Phase 2) -----------------------------------------
+  // After-touch camera transitions: every selection intent flows through one
+  // path that frames the subject at the DisplayBounds safe-frame center
+  // (not the viewport center), animates position + target with the existing
+  // interruptible glide, and applies the intent's follow directive only on
+  // natural completion. A cancelled intent never engages follow.
+  var TransitionEngine = (function () {
+    function worldPerPixel(dist) {
+      var vFov = THREE.MathUtils.degToRad(camera.fov);
+      var h = renderer.domElement.clientHeight || 1;
+      return (2 * dist * Math.tan(vFov / 2)) / h;
+    }
+    // Shift pos/tgt so the subject renders at the safe-frame center instead
+    // of the viewport center. Uses the camera's right/up basis at the
+    // subject's depth; no-ops when the safe frame is already centered.
+    function applySafeFrameOffset(pos, tgt) {
+      var b = DisplayBounds.get();
+      var sx = b.center.x - b.vw / 2, sy = b.center.y - b.vh / 2;
+      if (Math.abs(sx) < 1 && Math.abs(sy) < 1) return { pos: pos, tgt: tgt };
+      var wpp = worldPerPixel(pos.distanceTo(tgt));
+      camera.updateMatrixWorld();
+      var right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+      var up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+      var off = new THREE.Vector3()
+        .addScaledVector(right, -sx * wpp)
+        .addScaledVector(up, sy * wpp);
+      return { pos: pos.clone().add(off), tgt: tgt.clone().add(off) };
+    }
+    // 32° elevated vantage for a bus at (bx, bz); keeps the current azimuth
+    // so buildings don't occlude the subject. Distance respects the active
+    // zoom limit so the per-frame clamp can't snap back mid-glide.
+    function vantageForBus(bx, bz) {
+      var bd = Math.max(controls.minDistance * 1.3, 900);
+      _svDir.copy(camera.position).sub(controls.target); _svDir.y = 0;
+      if (_svDir.lengthSq() < 1e-6) _svDir.set(1, 0, 0);
+      _svDir.normalize();
+      return {
+        pos: new THREE.Vector3(bx + _svDir.x * bd, bd * 0.65, bz + _svDir.z * bd),
+        tgt: new THREE.Vector3(bx, 40, bz)
+      };
+    }
+    // intent: { vantage:{pos,tgt}, follow:'engage'|'hold', vehicleId, slot }
+    function go(intent) {
+      if (typeof tripFly !== 'undefined' && tripFly) return; // D4a: cinematic owns the camera
+      var framed = applySafeFrameOffset(intent.vantage.pos, intent.vantage.tgt);
+      var dist = camera.position.distanceTo(framed.pos);
+      var dur = Math.min(1600, Math.max(600, dist * 0.35));
+      glideTo(framed.pos, framed.tgt, dur, function () {
+        if (intent.follow === 'engage' && intent.vehicleId) setFollow(intent.vehicleId, intent.slot);
+        else refreshFollowBtn();
+      });
+    }
+    return { go: go, vantageForBus: vantageForBus };
+  })();
   // Vantage for a stop anchor: keep the user's current azimuth, pull back to
   // an oblique street-level framing. Works for DDOT stops (ground) and
   // People Mover stations (elevated deck).
@@ -1166,13 +1229,20 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   // Any canvas pointerdown hands the camera back to the user.
   var followVId = null;
   var _followPrev = new THREE.Vector3();
+  // Single mutation point for follow state: keeps the Follow button label in
+  // sync wherever tracking starts or stops.
+  function setFollow(vid, slot) {
+    followVId = vid || null;
+    if (followVId && slot) _followPrev.set(slot.x, 0, slot.z);
+    refreshFollowBtn();
+  }
   function followTick() {
     if (!followVId) return;
     var sl = null;
     for (var i = 0; i < busSlots.length; i++) {
       if (busSlots[i].vehicle && busSlots[i].vehicle.vehicle_id === followVId) { sl = busSlots[i]; break; }
     }
-    if (!sl) { followVId = null; return; } // bus left the visible set: stop
+    if (!sl) { setFollow(null); return; } // bus left the visible set: stop
     if (streetTween || (typeof tripFly !== 'undefined' && tripFly)) {
       _followPrev.set(sl.x, 0, sl.z); // a glide owns the camera: keep the seed fresh
       return;
@@ -1191,8 +1261,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     renderBusInstances(); // expand the selected indicator
     var sn = v.route_id;
     var dest = formatDest(sn, v.destination);
-    $('bus-chip').style.background = routeColors[sn] ? '#' + routeColors[sn].getHexString() : '#F5F2EA';
+    var chipBg = routeColors[sn] ? '#' + routeColors[sn].getHexString() : '#F5F2EA';
+    $('bus-chip').style.background = chipBg;
+    $('bus-chip-c').style.background = chipBg;
     $('bus-title').textContent = sn + ' · ' + (routeNames[sn] || 'DDOT') + (dest ? ' → ' + dest : '');
+    $('bus-compact-title').textContent = sn + ' · ' + (routeNames[sn] || 'DDOT') + (dest ? ' → ' + dest : '');
+    $('bus-compact-id').textContent = 'Vehicle ' + (v.vehicle_id || '–');
     $('bus-id').textContent = v.vehicle_id || '–';
     $('bus-dest').textContent = formatDest(sn, v.destination) || '–';
     $('bus-speed').textContent = (v.speed_mph != null && !isNaN(v.speed_mph)) ? Math.round(v.speed_mph) + ' mph' : '–';
@@ -1203,42 +1277,66 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var when = v.updated_at ? new Date(v.updated_at) : null;
     $('bus-card-updated').textContent = (when && !isNaN(when)) ? when.toLocaleTimeString() : '–';
     $('bus-card').hidden = false;
+    // D1a: on mobile the card opens as a compact route/vehicle bar; tap to expand.
+    setBusCardCompact(DisplayBounds.get().deviceClass === 'mobile');
     refreshBusInfo(); // in-scene label beside the bus
-    // Move the view to the bus on the live map: keep the current azimuth and
-    // frame the bus at a distance that respects the active zoom limit, so the
-    // per-frame controls clamp can't snap the camera back out mid-glide.
+    // After-touch transition: one engine path frames the bus at the
+    // safe-frame center (not the viewport center), so the card never covers
+    // it. D2b: on mobile the selection frames and holds; the explicit Follow
+    // button starts tracking. Desktop keeps the existing auto-follow.
     if (typeof tripFly === 'undefined' || !tripFly) {
       var _bs = null;
       for (var _bi = 0; _bi < busSlots.length; _bi++) {
         if (busSlots[_bi].vehicle && busSlots[_bi].vehicle.vehicle_id === v.vehicle_id) { _bs = busSlots[_bi]; break; }
       }
       if (_bs) {
-        // Frame from a ~32° elevation: low obliques let 3D buildings occlude
-        // the bus; the higher vantage looks over them. Distance still respects
-        // the active zoom limit so the per-frame clamp can't snap back out.
-        var _bd = Math.max(controls.minDistance * 1.3, 900);
-        _svDir.copy(camera.position).sub(controls.target); _svDir.y = 0;
-        if (_svDir.lengthSq() < 1e-6) _svDir.set(1, 0, 0);
-        _svDir.normalize();
-        glideTo(
-          new THREE.Vector3(_bs.x + _svDir.x * _bd, _bd * 0.65, _bs.z + _svDir.z * _bd),
-          new THREE.Vector3(_bs.x, 40, _bs.z),
-          1200
-        );
-        // Engage follow: the glide is one-time, the bus keeps moving.
-        followVId = v.vehicle_id;
-        _followPrev.set(_bs.x, 0, _bs.z);
+        TransitionEngine.go({
+          vantage: TransitionEngine.vantageForBus(_bs.x, _bs.z),
+          follow: DisplayBounds.get().deviceClass === 'mobile' ? 'hold' : 'engage',
+          vehicleId: v.vehicle_id,
+          slot: _bs
+        });
       }
     }
   }
   function hideBus() {
     selectedVehicleId = null;
-    followVId = null; // stop tracking
+    setFollow(null); // stop tracking
     $('bus-card').hidden = true;
     busInfoSprite.visible = false;
     renderBusInstances(); // shrink the indicator back
   }
   $('bus-close').addEventListener('click', hideBus);
+  // --- D1a compact bar + D2b Follow button ---------------------------------
+  // On mobile the bus card opens collapsed to a route/vehicle bar; tapping
+  // the bar expands the full details. The Follow button toggles tracking on
+  // every device class (on mobile it is the only way tracking starts).
+  function setBusCardCompact(compact) {
+    $('bus-card').classList.toggle('compact', !!compact);
+  }
+  var _followBtnLabel = null;
+  function refreshFollowBtn() {
+    var label = followVId ? 'Following' : 'Follow';
+    if (label === _followBtnLabel) return;
+    _followBtnLabel = label;
+    var btns = document.querySelectorAll('.bus-follow-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].textContent = label;
+      btns[i].setAttribute('aria-pressed', followVId ? 'true' : 'false');
+    }
+  }
+  function toggleFollow() {
+    if (followVId) { setFollow(null); return; }
+    var sl = null;
+    for (var i = 0; i < busSlots.length; i++) {
+      if (busSlots[i].vehicle && busSlots[i].vehicle.vehicle_id === selectedVehicleId) { sl = busSlots[i]; break; }
+    }
+    if (sl) setFollow(selectedVehicleId, sl);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.bus-follow-btn'), function (b) {
+    b.addEventListener('click', toggleFollow);
+  });
+  $('bus-expand').addEventListener('click', function () { setBusCardCompact(false); });
 
   // --- Accessible browse panel: list-based alternative to canvas tapping ---
   // Every tappable 3D object (stop pylon, bus pillar) is also reachable as a
@@ -1877,7 +1975,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   }
   function showStop(st) {
     if (!st) return;
-    followVId = null; // a stop selection ends bus tracking
+    setFollow(null); // a stop selection ends bus tracking
     if (typeof tripMode !== 'undefined' && tripMode) tripTapStop(st);
     tapBuzz();
     setStopSelectedColor(selectedStopIndex, false);
