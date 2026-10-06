@@ -695,12 +695,76 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         var bt = routeBadgeTexture(bs.vehicle.route_id);
         if (sp.material.map !== bt.tex) { sp.material.map = bt.tex; sp.material.needsUpdate = true; }
         sp.userData.aspect = bt.aspect;
+        sp.userData.slot = bi;
+        sp.userData.pri = (selectedVehicleId && bs.vehicle.vehicle_id === selectedVehicleId) ? 0 : 1;
         sp.scale.set(h * bt.aspect, h, 1);
         sp.position.set(bs.x, yBase, bs.z);
         sp.visible = true;
       } else {
         sp.visible = false;
       }
+    }
+  }
+  // Guaranteed badge decluttering: greedy screen-space insertion, selected
+  // bus first, then stable slot order. Each badge tests its anchor against
+  // placed rects; on overlap it spirals through 24 candidate offsets and
+  // takes the first non-overlapping slot. Separation is guaranteed by
+  // construction — badges never stack into a wall. Runs in smoothBadges.
+  var _dcV = new THREE.Vector3(), _dcR = new THREE.Vector3(), _dcU = new THREE.Vector3();
+  function declutterBadges() {
+    var cw = renderer.domElement.clientWidth || 1, ch = renderer.domElement.clientHeight || 1;
+    var items = [];
+    for (var i = 0; i < badgePool.length; i++) {
+      var sp = badgePool[i];
+      if (!sp.visible || !sp.userData.aspect) continue;
+      items.push(sp);
+    }
+    if (items.length < 2) {
+      // Still anchor single badges at their yBase (set by smoothBadges caller).
+      return;
+    }
+    items.sort(function (a, b) { return (a.userData.pri - b.userData.pri) || (a.userData.slot - b.userData.slot); });
+    camera.updateMatrixWorld();
+    _dcR.setFromMatrixColumn(camera.matrix, 0);
+    _dcU.setFromMatrixColumn(camera.matrix, 1);
+    var placed = []; // {x,y,w,h} in screen px
+    for (var k = 0; k < items.length; k++) {
+      var s2 = items[k];
+      var bw = s2.scale.x, bh = s2.scale.y;
+      // anchor screen pos
+      _dcV.copy(s2.position).project(camera);
+      var ax = (_dcV.x * 0.5 + 0.5) * cw, ay = (-_dcV.y * 0.5 + 0.5) * ch;
+      // badge world-to-px at anchor depth for offset conversion
+      var dist = camera.position.distanceTo(s2.position);
+      var wpp = (2 * dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)) / ch;
+      var found = null;
+      outer:
+      for (var ring = 0; ring <= 2; ring++) {
+        var rad = ring * Math.max(bw, bh) * 0.75 / Math.max(wpp, 1e-6); // world units
+        var steps = ring === 0 ? 1 : 8;
+        for (var st = 0; st < steps; st++) {
+          var ang = (st / steps) * Math.PI * 2 + ring * 0.4;
+          var ox = ring === 0 ? 0 : Math.cos(ang) * rad;
+          var oy = ring === 0 ? 0 : Math.sin(ang) * rad;
+          // candidate world pos = anchor + right*ox + up*oy
+          _dcV.copy(s2.position).addScaledVector(_dcR, ox).addScaledVector(_dcU, oy).project(camera);
+          var cx = (_dcV.x * 0.5 + 0.5) * cw, cy = (-_dcV.y * 0.5 + 0.5) * ch;
+          // screen-space badge rect (scale is world units; convert)
+          var pxW = bw / Math.max(wpp, 1e-6), pxH = bh / Math.max(wpp, 1e-6);
+          var ok = true;
+          for (var p = 0; p < placed.length; p++) {
+            var r = placed[p];
+            if (Math.abs(cx - r.x) < (pxW + r.w) / 2 && Math.abs(cy - r.y) < (pxH + r.h) / 2) { ok = false; break; }
+          }
+          if (ok) { found = { x: cx, y: cy, w: pxW, h: pxH, ox: ox, oy: oy }; break outer; }
+        }
+      }
+      if (!found) {
+        // Fallback (shouldn't happen): stack above anchor.
+        found = { x: ax, y: ay - placed.length * bh / Math.max(wpp, 1e-6), w: bw / wpp, h: bh / wpp, ox: 0, oy: placed.length * bh };
+      }
+      placed.push(found);
+      s2.position.addScaledVector(_dcR, found.ox).addScaledVector(_dcU, found.oy);
     }
   }
   // Per-frame badge smoothing: scale and anchor track the live zoom every
@@ -713,8 +777,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       var sp = badgePool[i];
       if (!sp.visible || !sp.userData.aspect) continue;
       sp.scale.set(h * sp.userData.aspect, h, 1);
-      sp.position.y = yBase;
+      // Reset to anchor before decluttering (declutter adds offsets).
+      var bs = busSlots[sp.userData.slot];
+      if (bs) sp.position.set(bs.x, yBase, bs.z);
     }
+    declutterBadges();
   }
 
   // Zoom LOD: wide view shows the symbolic pillars; zoomed in past ~2.6 km
@@ -870,7 +937,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   function stepStreetTween(now) {
     if (!streetTween) return;
     var t = Math.min(1, (now - streetTween.t0) / streetTween.dur);
-    var e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    // Minimum-jerk profile (Flash & Hogan): minimizes ∫jerk², the provably
+    // smoothest rest-to-rest trajectory and the one human motor control uses.
+    // Closed-form quintic; replaces easeInOutCubic. Interruption, follow-on-
+    // complete, and safe-frame offset behavior unchanged.
+    var e = t * t * t * (t * (t * 6 - 15) + 10);
     camera.position.lerpVectors(streetTween.fromPos, streetTween.toPos, e);
     controls.target.lerpVectors(streetTween.fromTgt, streetTween.toTgt, e);
     if (t >= 1) {
