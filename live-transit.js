@@ -841,7 +841,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       pre.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9999;max-width:92vw;max-height:40vh;overflow:auto;background:rgba(0,0,0,.85);color:#0f0;font:11px/1.4 monospace;padding:8px;white-space:pre-wrap;';
       document.body.appendChild(pre);
       setInterval(function () {
-        try { pre.textContent = JSON.stringify(DisplayBounds.get(), null, 1); } catch (e) { /* keep last */ }
+        try {
+          var d = DisplayBounds.get();
+          d.cam = [Math.round(camera.position.x), Math.round(camera.position.y), Math.round(camera.position.z)];
+          d.tgt = [Math.round(controls.target.x), Math.round(controls.target.y), Math.round(controls.target.z)];
+          d.follow = followVId;
+          d.selectedBus = selectedVehicleId;
+          pre.textContent = JSON.stringify(d, null, 1);
+        } catch (e) { /* keep last */ }
       }, 500);
     })();
   }
@@ -1263,10 +1270,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     var dest = formatDest(sn, v.destination);
     var chipBg = routeColors[sn] ? '#' + routeColors[sn].getHexString() : '#F5F2EA';
     $('bus-chip').style.background = chipBg;
-    $('bus-chip-c').style.background = chipBg;
-    $('bus-title').textContent = sn + ' · ' + (routeNames[sn] || 'DDOT') + (dest ? ' → ' + dest : '');
-    $('bus-compact-title').textContent = sn + ' · ' + (routeNames[sn] || 'DDOT') + (dest ? ' → ' + dest : '');
-    $('bus-compact-id').textContent = 'Vehicle ' + (v.vehicle_id || '–');
+    var chipC = $('bus-chip-c'); // compact bar (staging Phase 2 HTML); guard for HTML without it
+    if (chipC) chipC.style.background = chipBg;
+    var compactTitle = sn + ' · ' + (routeNames[sn] || 'DDOT') + (dest ? ' → ' + dest : '');
+    $('bus-title').textContent = compactTitle;
+    var cTitle = $('bus-compact-title');
+    if (cTitle) cTitle.textContent = compactTitle;
+    var cId = $('bus-compact-id');
+    if (cId) cId.textContent = 'Vehicle ' + (v.vehicle_id || '–');
     $('bus-id').textContent = v.vehicle_id || '–';
     $('bus-dest').textContent = formatDest(sn, v.destination) || '–';
     $('bus-speed').textContent = (v.speed_mph != null && !isNaN(v.speed_mph)) ? Math.round(v.speed_mph) + ' mph' : '–';
@@ -1336,7 +1347,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   Array.prototype.forEach.call(document.querySelectorAll('.bus-follow-btn'), function (b) {
     b.addEventListener('click', toggleFollow);
   });
-  $('bus-expand').addEventListener('click', function () { setBusCardCompact(false); });
+  var _busExpand = $('bus-expand'); // compact bar (staging Phase 2 HTML); guard for HTML without it
+  if (_busExpand) _busExpand.addEventListener('click', function () { setBusCardCompact(false); });
 
   // --- Accessible browse panel: list-based alternative to canvas tapping ---
   // Every tappable 3D object (stop pylon, bus pillar) is also reachable as a
