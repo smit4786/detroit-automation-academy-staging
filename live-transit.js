@@ -1021,6 +1021,18 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         tgt: new THREE.Vector3(bx, 40, bz)
       };
     }
+    // 32° elevated vantage for a stop at (sx, sy, sz); keeps the current
+    // azimuth. Closer than the bus vantage (stops are smaller targets).
+    function vantageForStop(sx, sy, sz) {
+      var sd = Math.max(controls.minDistance * 1.1, 700);
+      _svDir.copy(camera.position).sub(controls.target); _svDir.y = 0;
+      if (_svDir.lengthSq() < 1e-6) _svDir.set(1, 0, 0);
+      _svDir.normalize();
+      return {
+        pos: new THREE.Vector3(sx + _svDir.x * sd, sy + sd * 0.65, sz + _svDir.z * sd),
+        tgt: new THREE.Vector3(sx, sy, sz)
+      };
+    }
     // intent: { vantage:{pos,tgt}, follow:'engage'|'hold', vehicleId, slot }
     function go(intent) {
       if (typeof tripFly !== 'undefined' && tripFly) return; // D4a: cinematic owns the camera
@@ -1032,7 +1044,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         else refreshFollowBtn();
       });
     }
-    return { go: go, vantageForBus: vantageForBus };
+    return { go: go, vantageForBus: vantageForBus, vantageForStop: vantageForStop };
   })();
   // Vantage for a stop anchor: keep the user's current azimuth, pull back to
   // an oblique street-level framing. Works for DDOT stops (ground) and
@@ -2109,6 +2121,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     stopHighlight.position.set(st.x, st.pm ? PM_DECK_Y + 4 : 20, st.z);
     stopHighlight.visible = true;
     renderStopLive();
+    // Stop selection glides the camera (Phase 2 stop intent): frame the stop
+    // at the safe-frame center. No follow — stops don't move. Skipped in
+    // street view (its own glide above), trip modes, and the cinematic.
+    if (!streetView && !tripFly && !(typeof tripMode !== 'undefined' && tripMode)) {
+      var _sy = st.pm ? PM_DECK_Y : 20;
+      TransitionEngine.go({
+        vantage: TransitionEngine.vantageForStop(st.x, _sy, st.z),
+        follow: 'hold'
+      });
+    }
     // In street view, tapping a stop glides the camera to center it —
     // the max-zoom way of walking down the street stop by stop.
     if (streetView && !tripFly && !(typeof tripMode !== 'undefined' && tripMode)) {
