@@ -4358,6 +4358,27 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       // DDOT route filters. Absent (fetch failed) the map simply has no PM layer.
       if (pmData && pmData.loop && pmData.stations) buildPeopleMover(pmData);
 
+      /* LANDMARK-MASSING-BEGIN v20261006-1700 — staging-only Phase A.
+         True-form OSM landmark massing (single merged mesh, 1 draw call).
+         Geometry: /tmp/build_landmarks.py. Revert: delete this block and
+         landmarks.json. */
+      (function () {
+        if (window.__landmarksA) return; window.__landmarksA = true;
+        fetch('landmarks.json?v=' + STAMP, { cache: 'no-store' })
+          .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+          .then(function (L) {
+            var g = new THREE.BufferGeometry();
+            g.setAttribute('position', new THREE.Float32BufferAttribute(L.positions, 3));
+            g.setIndex(L.index);
+            g.computeVertexNormals();
+            var mesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: 0x3a4a5c }));
+            mesh.frustumCulled = false;
+            scene.add(mesh);
+          })
+          .catch(function (e) { console.warn('[landmarks] ' + e.message); });
+      })();
+      /* LANDMARK-MASSING-END */
+
       buildFilterPanel(data.groups);
       applyFilters();
       syncFilterUI();
