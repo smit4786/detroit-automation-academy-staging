@@ -13,7 +13,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 (function () {
   'use strict';
 
-  var STAMP = '20261004-2105';
+  var STAMP = '20261006-2115';
+  // Build string in the help footer derives from the cache stamp — never
+  // hardcoded (2026-10-06: a stale hardcoded "Build 20261002-2780" shipped
+  // for days before anyone noticed).
+  try {
+    var _bs = document.getElementById('build-stamp');
+    if (_bs) _bs.textContent = 'Build ' + STAMP + '.';
+  } catch (e) {}
   var POLL_MS = 60000;
   var BUS_MAX = 400;
   var DETAIL_MAX = 48;
@@ -921,8 +928,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
   window.__db = function () { return DisplayBounds.get(); };
   // STAGING-ONLY debug readout: ?dbdebug=1 renders the live DisplayBounds
   // measurement into the DOM so script-less verification can read it.
-  // Never ship this block to production.
-  if (/[?&]dbdebug=1/.test(location.search)) {
+  // Hostname-gated: never activates on production (2026-10-06).
+  if (/[?&]dbdebug=1/.test(location.search) &&
+      /smit4786\.github\.io|localhost/.test(location.hostname)) {
     (function () {
       var pre = document.createElement('pre');
       pre.id = 'db-debug';
@@ -1134,21 +1142,37 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
       if (qd2 < 1000 * 1000) scored.push([qd2, q]);
     }
     scored.sort(function (a, b) { return a[0] - b[0]; });
-    var n = Math.min(stopLabelPool.length, scored.length);
-    for (i = 0; i < stopLabelPool.length; i++) {
-      var sp = stopLabelPool[i];
-      if (i < n) {
-        var st = scored[i][1];
-        var o = stopLabelTex(st.n);
-        if (sp.userData.tex !== o.tex) { sp.material.map = o.tex; sp.userData.tex = o.tex; sp.material.needsUpdate = true; }
-        var h = 44;
-        sp.scale.set(h * o.aspect, h, 1);
-        sp.position.set(st.x, (st.pm ? PM_DECK_Y : STOP_BASE_Y) + stopHeight((st.r || []).length) * stopYS + 40, st.z);
-        sp.visible = true;
-      } else {
-        sp.visible = false;
+    // Nearest-first placement with screen-space collision: no overlapping
+    // stop labels (2026-10-06: production screenshot showed stop names
+    // stacking into unreadable piles at street zoom).
+    var placed = [];
+    var rw = renderer.domElement.clientWidth, rh = renderer.domElement.clientHeight;
+    var camDist = camera.position.distanceTo(controls.target);
+    var pxPerM = rh / (2 * camDist * Math.tan(camera.fov * 0.5 * DEG));
+    var n = 0;
+    for (i = 0; i < scored.length && n < stopLabelPool.length; i++) {
+      var st = scored[i][1];
+      var o = stopLabelTex(st.n);
+      var ly = (st.pm ? PM_DECK_Y : STOP_BASE_Y) + stopHeight((st.r || []).length) * stopYS + 40;
+      _p3.set(st.x, ly, st.z).project(camera);
+      if (_p3.z > 1 || _p3.z < -1) continue;
+      var cxp = (_p3.x * 0.5 + 0.5) * rw, cyp = (-_p3.y * 0.5 + 0.5) * rh;
+      var lw = 44 * o.aspect * pxPerM, lh = 44 * pxPerM;
+      var clash = false;
+      for (var c = 0; c < placed.length; c++) {
+        var pr = placed[c];
+        if (Math.abs(cxp - pr.x) < (lw + pr.w) / 2 + 8 &&
+            Math.abs(cyp - pr.y) < (lh + pr.h) / 2 + 6) { clash = true; break; }
       }
+      if (clash) continue;
+      placed.push({ x: cxp, y: cyp, w: lw, h: lh });
+      var sp = stopLabelPool[n++];
+      if (sp.userData.tex !== o.tex) { sp.material.map = o.tex; sp.userData.tex = o.tex; sp.material.needsUpdate = true; }
+      sp.scale.set(44 * o.aspect, 44, 1);
+      sp.position.set(st.x, ly, st.z);
+      sp.visible = true;
     }
+    for (i = n; i < stopLabelPool.length; i++) stopLabelPool[i].visible = false;
   }
 
   // Zoom-coupled pillar scale, eased every frame toward the zoom target so
