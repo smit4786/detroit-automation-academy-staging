@@ -6,20 +6,20 @@
 <meta name="robots" content="noindex, nofollow">
 <title>DAAD — UAT</title>
 <style>
-  :root { color-scheme: light; }
+  :root { color-scheme: dark; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #fff; color: #111; font: 16px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  body { margin: 0; background: #000; color: #f5f5f5; font: 16px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
   main { max-width: 42rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
-  .tag { display: inline-block; border: 2px solid #111; padding: .15rem .6rem; font-weight: 700; letter-spacing: .12em; font-size: .8rem; }
+  .tag { display: inline-block; border: 2px solid #f5f5f5; padding: .15rem .6rem; font-weight: 700; letter-spacing: .12em; font-size: .8rem; }
   h1 { font-size: 2rem; margin: 1rem 0 .25rem; }
-  p.sub { color: #444; margin: 0 0 2rem; }
-  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid #111; }
-  li { border-bottom: 1px solid #ccc; }
-  li a { display: block; padding: 1rem .25rem; color: #111; text-decoration: none; }
-  li a:hover, li a:focus { background: #eee; }
+  p.sub { color: #c9c9c9; margin: 0 0 2rem; }
+  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid #f5f5f5; }
+  li { border-bottom: 1px solid #2e2e2e; }
+  li a { display: block; padding: 1rem .25rem; color: #f5f5f5; text-decoration: none; }
+  li a:hover, li a:focus { background: #161616; }
   li a b { display: block; font-size: 1.1rem; }
-  li a span { color: #555; font-size: .9rem; }
-  footer { margin-top: 2.5rem; color: #555; font-size: .85rem; }
+  li a span { color: #8f8f8f; font-size: .9rem; }
+  footer { margin-top: 2.5rem; color: #8f8f8f; font-size: .85rem; }
 </style>
 </head>
 <body>
@@ -28,12 +28,12 @@
   <h1>DAAD — UAT</h1>
   <p class="sub">User-acceptance candidate for the Detroit Automation Academy domain. This is a staging build, not the production site.</p>
   <ul>
-    <li><a href="live-transit.html"><b>Live Transit Detroit — full app</b><span>Archived Core v2.3 build (stamp 20261101-0056), restored intact for parity testing.</span></a></li>
+    <li><a href="live-transit.html"><b>Live Transit Detroit — V2 candidate</b><span>Full archived functionality (Core v2.3, stamp 20261101-0056) under the V2 black-and-white chrome. Candidate ready for render check.</span></a></li>
     <li><a href="signal/"><b>The Signal</b><span>Newsletter surface — B/W rebuild candidate.</span></a></li>
     <li><a href="press/"><b>The Press</b><span>Publications surface — B/W rebuild candidate.</span></a></li>
   </ul>
   <footer>
-    <p>Data note: the transit app reads its feeds from this host. On UAT those feeds are a static snapshot of the production live-data files (captured 2026-11-01, ~19:44 UTC), so vehicle positions will age and the app's own stale/degraded states apply. External layers (e.g. MoGo GBFS) still read their live sources.</p>
+    <p>Data note: the transit app reads its feeds from this host. On UAT those feeds are a static snapshot of the production live-data files (vehicles + SMART captured 2026-11-01 19:46 UTC; alerts 19:40 UTC), so vehicle positions will age and the app's own stale/degraded states apply. External layers (e.g. MoGo GBFS) still read their live sources.</p>
   </footer>
 </main>
 </body>

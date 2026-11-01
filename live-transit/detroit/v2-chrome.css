@@ -1,0 +1,248 @@
+/* Live Transit Detroit — V2 chrome (B/W standard, 2026-11-01).
+   Grayscale ramp only: state via weight / contrast / pattern / label, never hue.
+   Ports the archived shell's inline geometry (phl-wrap 1200px, phl-head,
+   #lt-map block, .lt-region rhythm, panel pins) and authors rules for the
+   module-emitted lt-* classes, which have no rules anywhere in the V1 estate.
+   Module-injected APP_LOCK_CSS (fs-lock) is left to the modules. */
+
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(../../assets/fonts/inter-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url(../../assets/fonts/inter-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url(../../assets/fonts/inter-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url(../../assets/fonts/inter-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url(../../assets/fonts/space-grotesk-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk'; font-style: normal; font-weight: 500; font-display: swap;
+  src: url(../../assets/fonts/space-grotesk-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk'; font-style: normal; font-weight: 600; font-display: swap;
+  src: url(../../assets/fonts/space-grotesk-latin.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url(../../assets/fonts/space-grotesk-latin.woff2) format('woff2');
+}
+
+:root {
+  --field: #000000;
+  --panel: #0d0d0d;
+  --panel-2: #161616;
+  --line: #2e2e2e;
+  --line-2: #4a4a4a;
+  --txt: #f5f5f5;
+  --dim: #c9c9c9;
+  --mute: #8f8f8f;
+  --white: #ffffff;
+  --black: #000000;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+body {
+  overflow-x: clip;
+  background: var(--field);
+  color: var(--txt);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; line-height: 1.12; letter-spacing: -0.01em; text-wrap: balance; }
+h1 { font-size: 30px; font-weight: 700; }
+h2 { font-size: 24px; font-weight: 700; margin: 0.4em 0 0.6em; }
+h3 { font-size: 19px; font-weight: 600; margin: 0.9em 0 0.4em; }
+p { margin: 0.35em 0; }
+
+/* ---------- inline elements and controls: no default browser chrome ---------- */
+a { color: var(--white); text-decoration: underline; text-decoration-color: var(--mute); text-underline-offset: 3px; }
+a:hover, a:focus { text-decoration-color: var(--white); text-decoration-thickness: 2px; }
+button {
+  font: inherit; font-size: 15px; cursor: pointer;
+  background: var(--panel-2); color: var(--txt);
+  border: 1px solid var(--line-2); border-radius: 2px;
+  padding: 8px 14px;
+}
+button:hover, button:focus-visible { background: var(--white); color: var(--black); border-color: var(--white); }
+button:active { font-weight: 700; }
+button:disabled { opacity: 0.45; cursor: default; }
+button:disabled:hover { background: var(--panel-2); color: var(--txt); border-color: var(--line-2); }
+input[type="text"], input[type="search"], input:not([type]), select, textarea {
+  font: inherit; font-size: 16px; width: 100%;
+  background: var(--black); color: var(--white);
+  border: 1px solid var(--line-2); border-radius: 2px;
+  padding: 10px 12px;
+}
+input::placeholder { color: var(--mute); }
+input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  width: 17px; height: 17px; flex: none;
+  border: 1px solid var(--line-2); border-radius: 2px;
+  background: var(--black); vertical-align: -3px; margin-right: 8px;
+  position: relative; cursor: pointer;
+}
+input[type="checkbox"]:checked { background: var(--white); border-color: var(--white); }
+input[type="checkbox"]:checked::after {
+  content: ""; position: absolute; left: 5px; top: 2px;
+  width: 5px; height: 9px;
+  border: solid var(--black); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+input[type="checkbox"]:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid var(--white); outline-offset: 2px;
+}
+label { cursor: pointer; }
+ul, ol { padding-left: 1.2em; }
+
+/* ---------- V2 shell header / footer ---------- */
+.v2-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--field);
+}
+.v2-wordmark { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 0.02em; color: var(--white); text-decoration: none; }
+.v2-wordmark span { font-weight: 400; color: var(--dim); }
+.v2-back { font-size: 14px; font-weight: 600; text-decoration: none; border: 1px solid var(--line-2); padding: 5px 12px; border-radius: 2px; }
+.v2-back:hover { background: var(--white); color: var(--black); }
+.v2-foot { border-top: 1px solid var(--line); padding: 18px 16px 26px; color: var(--mute); font-size: 13px; }
+.v2-foot strong { color: var(--dim); font-weight: 600; }
+
+/* ---------- page frame (geometry ported from the archived shell) ---------- */
+.phl-wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.phl-head { padding: 16px 0 10px; }
+.phl-head h1 { margin: 0 0 6px; }
+.phl-head p { margin: 4px 0; color: var(--dim); max-width: 75ch; }
+.phl-head .accent { color: var(--white); }
+.phl-about { padding: 8px 0 20px; }
+.phl-about p { color: var(--dim); max-width: 75ch; }
+.lt-region { margin: 12px 0; }
+
+/* ---------- status, map, state panels ---------- */
+#lt-status { font-weight: 700; color: var(--white); margin: 8px 0; letter-spacing: 0.01em; }
+#lt-map {
+  width: 100%; height: 74svh; min-height: 440px; display: block;
+  background: #0a0a0a; border: 1px solid var(--line); border-radius: 2px;
+  touch-action: none;
+}
+#lt-load-error { display: none; border: 1px solid var(--white); border-radius: 2px; padding: 12px 14px; background: var(--panel-2); color: var(--white); margin: 12px 0; }
+#lt-degraded { display: none; border: 1px dashed var(--mute); border-radius: 2px; padding: 12px 14px; background: var(--panel); color: var(--dim); margin: 12px 0; }
+#lt-info { display: none; border: 1px solid var(--line); border-radius: 2px; padding: 4px 14px 10px; background: var(--panel); color: var(--txt); margin: 12px 0; }
+
+/* ---------- filter panel: layer chips ---------- */
+#lt-filter-panel { display: flex; flex-wrap: wrap; gap: 8px; }
+#lt-filter-panel label {
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--line-2); border-radius: 2px;
+  background: var(--panel); padding: 7px 12px 7px 10px; font-size: 15px; font-weight: 500;
+}
+#lt-filter-panel label:has(input:checked) { border-color: var(--white); background: var(--panel-2); font-weight: 700; }
+#lt-filter-panel input[type="checkbox"] { margin-right: 8px; }
+
+/* ---------- launcher ---------- */
+.lt-launcher-head { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+#lt-launcher button { text-align: left; }
+
+/* ---------- cards (stop / route / vehicle / station) ---------- */
+.lt-card { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding: 6px 16px 14px; margin: 10px 0; }
+.lt-card h2 { font-size: 22px; margin-top: 10px; }
+.lt-card-sub { color: var(--dim); margin-top: -4px; }
+.lt-stop-card { border-top: 3px solid var(--white); }
+.lt-route-card { border-top: 3px solid var(--dim); }
+.lt-vehicle-card { border-top: 3px solid var(--white); }
+.lt-station-card { border-top: 3px dashed var(--mute); }
+.lt-card-alerts { border: 1px dashed var(--line-2); padding: 8px 12px; margin: 10px 0; background: var(--panel-2); }
+.lt-card-alerts p { font-weight: 600; }
+.lt-scope { color: var(--mute); font-weight: 400; }
+.lt-note { color: var(--dim); font-size: 14px; }
+.lt-position { font-weight: 700; color: var(--white); }
+
+/* ---------- arrival lists and state labels ---------- */
+.lt-arrivals, .lt-boarding, .lt-directions, .lt-suggestions, .lt-transfers, .lt-upcoming { list-style: none; padding-left: 0; }
+.lt-arrivals li, .lt-boarding li, .lt-directions li, .lt-suggestions li, .lt-transfers li, .lt-upcoming li {
+  padding: 8px 0; border-bottom: 1px solid #1d1d1d;
+}
+.lt-arrivals li:last-child, .lt-boarding li:last-child, .lt-directions li:last-child { border-bottom: none; }
+.stop-live-row { }
+li.stop-live-row { }
+button.stop-live-row { display: block; width: 100%; text-align: left; }
+.lt-live {
+  display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+  color: var(--black); background: var(--white); padding: 1px 6px; border-radius: 2px; vertical-align: 2px;
+}
+.lt-sched { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); border: 1px solid var(--line-2); padding: 1px 6px; border-radius: 2px; vertical-align: 2px; }
+.lt-scheduled { opacity: 0.78; }
+.lt-stale-chip {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--dim); border: 1px dashed var(--mute); padding: 1px 6px; border-radius: 2px;
+}
+.lt-badge {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+  border: 1px solid var(--white); color: var(--white); padding: 1px 7px; border-radius: 2px;
+}
+
+/* ---------- alerts ---------- */
+.lt-alert { border-left: 3px solid var(--white); background: var(--panel-2); padding: 10px 12px; margin: 10px 0; }
+.lt-alert-routes { color: var(--dim); font-size: 14px; }
+#lt-alerts h2 { font-size: 20px; }
+
+/* ---------- browse: tabs, search, route list, chips ---------- */
+.lt-browse-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.lt-fields { display: grid; gap: 10px; margin: 10px 0; }
+.lt-route-list { list-style: none; padding-left: 0; }
+.lt-route-list li { border-bottom: 1px solid #1d1d1d; padding: 8px 0; }
+.lt-route-meta { color: var(--dim); font-size: 14px; }
+.lt-route-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.lt-route-chip, .lt-chip {
+  display: inline-block; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--line-2); border-radius: 2px;
+  background: var(--panel-2); color: var(--txt); padding: 3px 9px;
+}
+button.lt-chip:hover, button.lt-route-chip:hover { background: var(--white); color: var(--black); }
+.lt-group-note { color: var(--dim); font-size: 14px; border-left: 3px solid var(--line-2); padding-left: 10px; margin: 10px 0; }
+.lt-coverage { border: 1px solid var(--line); padding: 10px 12px; margin: 10px 0; background: var(--panel); }
+.lt-covered { font-weight: 700; color: var(--white); }
+.lt-stop-group { border: 1px solid var(--line); background: var(--panel); padding: 4px 14px 10px; margin: 10px 0; }
+.lt-picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+.lt-picker select { width: auto; flex: 1 1 220px; }
+
+/* ---------- planner ---------- */
+#lt-planner h2 { font-size: 20px; }
+#lt-plan-from-results, #lt-plan-to-results, #lt-plan-results, #lt-stop-results { margin-top: 8px; }
+.lt-journey { border-left: 3px solid var(--white); background: var(--panel); padding: 10px 14px; margin: 12px 0; }
+.lt-plan-error { border: 1px dashed var(--white); background: var(--panel-2); color: var(--white); font-weight: 600; padding: 10px 12px; margin: 10px 0; }
+.lt-plan-feed { color: var(--dim); font-size: 14px; }
+
+/* ---------- ride along / tiles (beta) ---------- */
+.lt-beta-tiles { margin: 12px 0; }
+.lt-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.lt-tile { border: 1px solid var(--line); background: var(--panel); padding: 10px 12px; border-radius: 2px; }
+.lt-tile-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); }
+.lt-tile-proof { font-weight: 700; color: var(--white); }
+
+/* ---------- places / passes / stations ---------- */
+.lt-places-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.lt-sponsored, .lt-sponsored-note { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); }
+.lt-sponsored { border: 1px dashed var(--line-2); padding: 2px 7px; border-radius: 2px; }
+.lt-passes { display: grid; gap: 10px; margin: 10px 0; }
+.lt-stations { display: grid; gap: 10px; margin: 10px 0; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  h1 { font-size: 25px; }
+  #lt-map { height: 68svh; min-height: 380px; }
+  .phl-wrap { padding: 0 12px; }
+  .lt-card { padding: 4px 12px 12px; }
+}
