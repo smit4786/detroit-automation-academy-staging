@@ -42,7 +42,14 @@
   <div id="lt-load-error" role="alert"></div>
   <div id="lt-degraded" role="status"></div>
 
-  <canvas id="lt-map" aria-label="3D map of DDOT, SMART, and QLINE routes with live bus positions"></canvas>
+  <!-- F1 fix (2026-11-01): the renderer fits the union route extent
+       (64.5 x 63.1 km) into the vertical FOV, so screen share is set
+       by the canvas aspect ratio. A full-width, short canvas left the
+       scene at ~38% of frame width. The frame narrows and deepens
+       the canvas toward the subject's aspect (see v2-chrome.css). -->
+  <div class="lt-map-frame">
+    <canvas id="lt-map" aria-label="3D map of DDOT, SMART, and QLINE routes with live bus positions"></canvas>
+  </div>
 
   <!-- Stop / vehicle card region (LT-KAES-30 / LT-KAES-31). -->
   <div id="lt-info" role="status"></div>
