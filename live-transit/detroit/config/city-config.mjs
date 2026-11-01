@@ -195,7 +195,7 @@ export const CITY_CONFIG = Object.freeze({
         Object.freeze({ feed: 'smart', stopCount: 5437 }), // [SRV served file stops count]
         Object.freeze({ feed: 'qline', stopCount: 22 }), //   [SRV served file stops count]
       ]),
-      recolor: Object.freeze({ smart: '#c30915' }), //        [SRV M:12184]
+      recolor: Object.freeze({ smart: '#313131' }), //        [SRV M:12184]
       streetExtGatedByGroup: 'smart', //                       [SRV M:7719-7725]
     }),
     provenanceManifest: 'geometry-manifest.json', // served 200 this run, 309,208 B, MD5 cb9121338ef3298b9b7ad8080057c5ca [SRV fetch 2026-10-31]
@@ -443,8 +443,8 @@ export const CITY_CONFIG = Object.freeze({
   // ---- Scene / motion / alert FX / filters / beta (schema v2.2 fold) --------
   scene: Object.freeze({
     // Water colours asserted by hourly-check-554 against the
-    // monolith: deep 0x0f2233, neon 0x00e5ff (decimals here).
-    waterColors: Object.freeze({ deep: 991795, neon: 58879 }), // 0x0f2233 / 0x00e5ff [CEN CG-12]
+    // monolith: deep 0x1f1f1f, neon 0xb6b6b6 (decimals here).
+    waterColors: Object.freeze({ deep: 2039583, neon: 11974326 }), // 0x1f1f1f / 0xb6b6b6 [CEN CG-12]
     stopLodDistM: 26000, // STOP_LOD_DIST = 26000 (M)          [CEN CG-12]
     streetView: true, // enterStreetView/exitStreetView (M:1911-2333) [CEN CG-12]
     // Camera memory exists (camMem, M:2141-2166) but is
