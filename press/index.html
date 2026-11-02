@@ -28,6 +28,7 @@
     <p class="fine" id="press-search-count" role="status"></p>
   </div>
 
+  <div id="press-latest">
   <div class="boardhead"><h3>Latest</h3><span>Newest briefs</span></div>
   <div>
       <a class="irow" href="#air-india-sets-up-a-dedicated-cost-savings-team-and-tightens-spending"><span class="no">TP</span><span class="g"><b>Air India Sets Up a Dedicated Cost-Savings Team and Tightens Spending Approvals, Its Chief Executive Tells Employees in a Memo</b><small>Wire brief</small></span><span class="dt">Reuters · October 15, 2026</span></a>
@@ -38,6 +39,7 @@
       <a class="irow" href="#travis-perkins-reports-a-1-3-fall-in-third-quarter-like-for-like-sales"><span class="no">TP</span><span class="g"><b>Travis Perkins Reports a 1.3% Fall in Third-Quarter Like-for-Like Sales and a 1.6% Fall in Group Revenue</b><small>Wire brief</small></span><span class="dt">Reuters · October 15, 2026</span></a>
       <a class="irow" href="#french-consumer-prices-rose-3-4-year-on-year-in-september-on-an-eu-har"><span class="no">TP</span><span class="g"><b>French Consumer Prices Rose 3.4% Year-on-Year in September on an EU-Harmonised Basis, INSEE Says</b><small>Wire brief</small></span><span class="dt">Reuters · October 15, 2026</span></a>
       <a class="irow" href="#vatican-says-pope-leo-had-a-good-night-in-hospital-and-has-eaten-break"><span class="no">TP</span><span class="g"><b>Vatican Says Pope Leo Had a Good Night in Hospital and Has Eaten Breakfast; His Public Schedule Is Canceled Until October 20</b><small>Wire brief</small></span><span class="dt">Reuters · October 15, 2026</span></a>
+  </div>
   </div>
 
   <div class="kit">
@@ -2261,6 +2263,7 @@
   var input = document.getElementById('press-search');
   var count = document.getElementById('press-search-count');
   var clearBtn = document.getElementById('press-search-clear');
+  var latest = document.getElementById('press-latest');
   if (!input) return;
   var items = Array.prototype.slice.call(document.querySelectorAll('.archive-list > li'));
   function apply() {
@@ -2274,6 +2277,7 @@
     else if (shown === 0) count.textContent = "No briefs match '" + raw + "'.";
     else count.textContent = shown + ' of ' + items.length + ' briefs match.';
     if (clearBtn) clearBtn.style.display = q ? '' : 'none';
+    if (latest) latest.style.display = q ? 'none' : '';
   }
   input.addEventListener('input', apply);
   if (clearBtn) clearBtn.addEventListener('click', function () {
