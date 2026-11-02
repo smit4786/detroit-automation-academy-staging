@@ -4,37 +4,90 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>DAAD — UAT</title>
-<style>
-  :root { color-scheme: dark; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: #000; color: #f5f5f5; font: 16px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
-  main { max-width: 42rem; margin: 0 auto; padding: 3rem 1.25rem 4rem; }
-  .tag { display: inline-block; border: 2px solid #f5f5f5; padding: .15rem .6rem; font-weight: 700; letter-spacing: .12em; font-size: .8rem; }
-  h1 { font-size: 2rem; margin: 1rem 0 .25rem; }
-  p.sub { color: #c9c9c9; margin: 0 0 2rem; }
-  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid #f5f5f5; }
-  li { border-bottom: 1px solid #2e2e2e; }
-  li a { display: block; padding: 1rem .25rem; color: #f5f5f5; text-decoration: none; }
-  li a:hover, li a:focus { background: #161616; }
-  li a b { display: block; font-size: 1.1rem; }
-  li a span { color: #8f8f8f; font-size: .9rem; }
-  footer { margin-top: 2.5rem; color: #8f8f8f; font-size: .85rem; }
-</style>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:8765 https://gfblip.com https://*.publicbikesystem.net; worker-src 'self' blob:">
+<title>Detroit Automation Academy — Live Transit Detroit</title>
+<link rel="stylesheet" href="./live-transit/detroit/v2-chrome.css?v=20261101-0056">
+<script type="importmap">
+{"imports": {"three": "./live-transit/detroit/vendor/three.module.min.js?v=20261101-0056", "three/addons/": "./live-transit/detroit/vendor/three-addons/"}}
+</script>
 </head>
 <body>
-<main>
-  <span class="tag">UAT</span>
-  <h1>DAAD — UAT</h1>
-  <p class="sub">User-acceptance candidate for the Detroit Automation Academy domain. This is a staging build, not the production site.</p>
-  <ul>
-    <li><a href="live-transit.html"><b>Live Transit Detroit — V2 candidate</b><span>Full archived functionality (Core v2.3, stamp 20261101-0056) under the V2 black-and-white chrome. Candidate ready for render check.</span></a></li>
-    <li><a href="signal/"><b>The Signal</b><span>Newsletter surface — B/W rebuild candidate.</span></a></li>
-    <li><a href="press/"><b>The Press</b><span>Publications surface — B/W rebuild candidate.</span></a></li>
-  </ul>
-  <footer>
-    <p>Data note: the transit app reads its feeds from this host. On UAT those feeds are a static snapshot of the production live-data files (vehicles + SMART captured 2026-11-01 19:46 UTC; alerts 19:40 UTC), so vehicle positions will age and the app's own stale/degraded states apply. External layers (e.g. MoGo GBFS) still read their live sources.</p>
-  </footer>
-</main>
+<div class="wrap">
+  <header class="sh-head">
+    <a class="sh-wordmark" href="./">LIVE TRANSIT<small>Detroit Automation Academy</small></a>
+    <nav id="daaNavLinks" aria-label="Primary">
+      <a href="./live-transit.html" class="on">Live Transit</a><a href="./signal/">The Signal</a><a href="./press/">The Press</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="lt-alerts"></div>
+    <div id="lt-degraded" role="status"></div>
+
+    <div class="ltd-grid">
+      <div class="mapcol">
+        <div class="mapwrap">
+          <div class="lt-map-frame" id="lt-frame">
+            <canvas id="lt-map" aria-label="Live map of Detroit transit"></canvas>
+            <div class="bar lt-chrome">
+              <div class="t">Live Transit<small>Detroit · DDOT · QLINE · SMART display</small></div>
+              <div class="fresh"><span class="dot" aria-hidden="true"></span><span id="lt-status">Starting…</span><small>Feed age · live</small></div>
+            </div>
+            <div class="tools lt-chrome">
+              <button type="button" id="sh-zoom-in" aria-label="Zoom in">+</button>
+              <button type="button" id="sh-zoom-out" aria-label="Zoom out">−</button>
+              <button type="button" id="sh-reset" aria-label="Reset view" title="Reset view">⌂</button>
+              <button type="button" class="fsbtn" id="sh-fs" aria-pressed="false" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
+            </div>
+            <div class="chips lt-chrome">
+              <button type="button" data-sheet="routes">Routes</button><button type="button" data-sheet="routes">Stops</button><button type="button" data-sheet="routes">Buses</button>
+            </div>
+            <div class="scale lt-chrome" aria-hidden="true"><div class="bar2"></div>Scale · live</div>
+            <div id="lt-load-error" role="alert"></div>
+          </div>
+        </div>
+        <div class="statusline">
+          <div class="n"><span id="sh-veh-n">—</span><span id="sh-veh-note">vehicles on the road</span></div>
+        </div>
+        <section id="lt-launcher" class="lt-region" aria-label="Start here"></section>
+      </div>
+
+      <div class="boardcol">
+        <div class="boardhead"><h3>On the road now</h3><span id="sh-board-meta">Loading…</span></div>
+        <div id="sh-board-rows"></div>
+        <button type="button" class="sh-entry" data-sheet="places"><span><b>Places</b><small>Nearby places + MoGo stations on the map</small></span></button>
+        <button type="button" class="sh-entry" data-sheet="routes"><span><b>Passes</b><small>Verified fare products — a tab in Routes</small></span></button>
+        <p class="boardnote">Tap a route for its card. SMART buses are display-only and never stored. Times come from the live feed; a stale feed is labeled, never hidden.</p>
+      </div>
+    </div>
+
+    <div class="entry-rows">
+      <a class="irow" href="./signal/"><span class="no">TS</span><span class="g"><b>The Signal — Edition 7: Detroit Votes This Week</b><small>The weekly briefing · analysis</small></span><span class="dt">Oct 30, 2026</span></a>
+      <a class="irow" href="./press/"><span class="no">TP</span><span class="g"><b>The Press — Just the Facts</b><small>Releases, wire style · media kit</small></span><span class="dt">Wire</span></a>
+    </div>
+
+    <div class="phl-about">
+      <p>Live Transit Detroit: DDOT and QLINE vehicles live on the map, SMART shown display-only from its public feed. Built and run by Detroit Automation Academy. This is the UAT staging build of the V2 design — data is the production feed, staged.</p>
+    </div>
+  </main>
+
+  <footer class="sh-foot"><span>Detroit, Michigan</span><span>Black &amp; white standard</span><span>UAT staging</span></footer>
+</div>
+
+<div id="sh-scrim"></div>
+<aside id="sh-sheet" aria-hidden="true">
+  <div class="sh-hd"><div><h3 id="sh-sheet-title">Card</h3><small id="sh-sheet-sub">Live Transit Detroit</small></div><button type="button" class="x" id="sh-sheet-close" aria-label="Close panel">×</button></div>
+  <div id="sh-sheet-body" data-lt-scroll>
+    <section id="lt-info" class="sheet-mount" data-view="card" aria-label="Card"></section>
+    <section id="lt-filter-panel" class="sheet-mount" data-view="routes" aria-label="Route filters"></section>
+    <section id="lt-browse-panel" class="sheet-mount" data-view="routes" aria-label="Routes, stops and passes"></section>
+    <section id="lt-planner" class="sheet-mount" data-view="planner" aria-label="Trip planner"></section>
+    <section id="lt-ride-along" class="sheet-mount" data-view="ride" aria-label="Ride along"></section>
+    <section id="lt-places" class="sheet-mount" data-view="places" aria-label="Places"></section>
+  </div>
+</aside>
+
+<script src="./live-transit/detroit/v2-chrome.js?v=20261101-0056"></script>
+<script type="module" src="./live-transit/detroit/modules/app.mjs?v=20261101-0056"></script>
 </body>
 </html>

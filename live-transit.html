@@ -3,102 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'">
-<title>Live Transit Detroit — Real-Time DDOT Bus Tracker in 3D</title>
-<meta name="description" content="Every DDOT bus live in 3D; SMART buses shown live under license. Positions publish about every five minutes — the map dead-reckons between updates.">
 <meta name="robots" content="noindex, nofollow">
-<!-- V2 chrome (B/W standard): document-relative, replaces the estate
-     /styles.css (V1 chrome, root-absolute). All app geometry and the
-     module lt-* classes are styled here; modules are byte-identical. -->
-<link rel="stylesheet" href="./live-transit/detroit/v2-chrome.css">
-<!-- Vendored rendering library, declared once (LT-KAES-05).
-     The importmap is the single declaration of the library for the page. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self' http://127.0.0.1:8765 https://gfblip.com https://*.publicbikesystem.net; worker-src 'self' blob:">
+<title>Live Transit Detroit — Live DDOT, QLINE + SMART buses</title>
+<link rel="stylesheet" href="./live-transit/detroit/v2-chrome.css?v=20261101-0056">
 <script type="importmap">
-{
-  "imports": {
-    "three": "./live-transit/detroit/vendor/three.module.min.js?v=20261101-0056",
-    "three/addons/": "./live-transit/detroit/vendor/three-addons/"
-  }
-}
+{"imports": {"three": "./live-transit/detroit/vendor/three.module.min.js?v=20261101-0056", "three/addons/": "./live-transit/detroit/vendor/three-addons/"}}
 </script>
 </head>
 <body>
-<header class="v2-head">
-  <a class="v2-wordmark" href="./index.html">DETROIT AUTOMATION <span>ACADEMY</span></a>
-  <nav id="daaNavLinks" aria-label="Primary">
-    <a class="v2-back" href="./index.html">← UAT home</a>
-  </nav>
-</header>
+<div class="wrap">
+  <header class="sh-head">
+    <a class="sh-wordmark" href="./">LIVE TRANSIT<small>Detroit Automation Academy</small></a>
+    <nav id="daaNavLinks" aria-label="Primary">
+      <a href="./live-transit.html" class="on">Live Transit</a><a href="./signal/">The Signal</a><a href="./press/">The Press</a>
+    </nav>
+  </header>
 
-<main class="phl-wrap">
-  <div class="phl-head">
-    <h1>Live transit <span class="accent">· Detroit</span></h1>
-    <p>83 routes and 10,583 stops drawn on the actual streets of Detroit — DDOT, SMART, and the QLINE streetcar — with live vehicle positions, published about every five minutes.</p>
-    <p id="lt-status" role="status">connecting…</p>
-    <p><a href="#lt-planner"><strong>Plan a trip →</strong></a> — this page shows live bus positions; the trip planner uses scheduled times.</p>
+  <main>
+    <div id="lt-alerts"></div>
+    <div id="lt-degraded" role="status"></div>
+
+    <div class="ltd-grid">
+      <div class="mapcol">
+        <div class="mapwrap">
+          <div class="lt-map-frame" id="lt-frame">
+            <canvas id="lt-map" aria-label="Live map of Detroit transit"></canvas>
+            <div class="bar lt-chrome">
+              <div class="t">Live Transit<small>Detroit · DDOT · QLINE · SMART display</small></div>
+              <div class="fresh"><span class="dot" aria-hidden="true"></span><span id="lt-status">Starting…</span><small>Feed age · live</small></div>
+            </div>
+            <div class="tools lt-chrome">
+              <button type="button" id="sh-zoom-in" aria-label="Zoom in">+</button>
+              <button type="button" id="sh-zoom-out" aria-label="Zoom out">−</button>
+              <button type="button" id="sh-reset" aria-label="Reset view" title="Reset view">⌂</button>
+              <button type="button" class="fsbtn" id="sh-fs" aria-pressed="false" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
+            </div>
+            <div class="chips lt-chrome">
+              <button type="button" data-sheet="routes">Routes</button><button type="button" data-sheet="routes">Stops</button><button type="button" data-sheet="routes">Buses</button>
+            </div>
+            <div class="scale lt-chrome" aria-hidden="true"><div class="bar2"></div>Scale · live</div>
+            <div id="lt-load-error" role="alert"></div>
+          </div>
+        </div>
+        <div class="statusline">
+          <div class="n"><span id="sh-veh-n">—</span><span id="sh-veh-note">vehicles on the road</span></div>
+        </div>
+        <section id="lt-launcher" class="lt-region" aria-label="Start here"></section>
+      </div>
+
+      <div class="boardcol">
+        <div class="boardhead"><h3>On the road now</h3><span id="sh-board-meta">Loading…</span></div>
+        <div id="sh-board-rows"></div>
+        <button type="button" class="sh-entry" data-sheet="places"><span><b>Places</b><small>Nearby places + MoGo stations on the map</small></span></button>
+        <button type="button" class="sh-entry" data-sheet="routes"><span><b>Passes</b><small>Verified fare products — a tab in Routes</small></span></button>
+        <p class="boardnote">Tap a route for its card. SMART buses are display-only and never stored. Times come from the live feed; a stale feed is labeled, never hidden.</p>
+      </div>
+    </div>
+
+    <div class="phl-about">
+      <p>Live Transit Detroit: DDOT and QLINE vehicles live on the map, SMART shown display-only from its public feed. Built and run by Detroit Automation Academy. This is the UAT staging build of the V2 design — data is the production feed, staged.</p>
+    </div>
+  </main>
+
+  <footer class="sh-foot"><span>Detroit, Michigan</span><span>Black &amp; white standard</span><span>UAT staging</span></footer>
+</div>
+
+<div id="sh-scrim"></div>
+<aside id="sh-sheet" aria-hidden="true">
+  <div class="sh-hd"><div><h3 id="sh-sheet-title">Card</h3><small id="sh-sheet-sub">Live Transit Detroit</small></div><button type="button" class="x" id="sh-sheet-close" aria-label="Close panel">×</button></div>
+  <div id="sh-sheet-body" data-lt-scroll>
+    <section id="lt-info" class="sheet-mount" data-view="card" aria-label="Card"></section>
+    <section id="lt-filter-panel" class="sheet-mount" data-view="routes" aria-label="Route filters"></section>
+    <section id="lt-browse-panel" class="sheet-mount" data-view="routes" aria-label="Routes, stops and passes"></section>
+    <section id="lt-planner" class="sheet-mount" data-view="planner" aria-label="Trip planner"></section>
+    <section id="lt-ride-along" class="sheet-mount" data-view="ride" aria-label="Ride along"></section>
+    <section id="lt-places" class="sheet-mount" data-view="places" aria-label="Places"></section>
   </div>
+</aside>
 
-  <!-- Load-error overlay + degradation notice (LT-KAES-40 / LT-S8.2). -->
-  <div id="lt-load-error" role="alert"></div>
-  <div id="lt-degraded" role="status"></div>
-
-  <!-- F1 fix (2026-11-01): the renderer fits the union route extent
-       (64.5 x 63.1 km) into the vertical FOV, so screen share is set
-       by the canvas aspect ratio. A full-width, short canvas left the
-       scene at ~38% of frame width. The frame narrows and deepens
-       the canvas toward the subject's aspect (see v2-chrome.css). -->
-  <div class="lt-map-frame">
-    <canvas id="lt-map" aria-label="3D map of DDOT, SMART, and QLINE routes with live bus positions"></canvas>
-  </div>
-
-  <!-- Stop / vehicle card region (LT-KAES-30 / LT-KAES-31). -->
-  <div id="lt-info" role="status"></div>
-
-  <!-- First-view launcher sheet mount (LT-KAES-36 / LT-S1.2). -->
-  <section id="lt-launcher" class="lt-region" aria-label="Start"></section>
-
-  <!-- Filter panel: groups mirror config.layerGroups (LT-S4.1);
-       R5 renders these from configuration — the checked state here
-       mirrors the configured defaults so the shell is honest
-       before scripts run. Toggling recomputes every derived
-       display immediately (LT-S4.2 / RC10). -->
-  <div id="lt-filter-panel" class="lt-region" role="group" aria-label="Map layers">
-    <label><input type="checkbox" data-group="connect-ten" checked> ConnectTen</label>
-    <label><input type="checkbox" data-group="primary" checked> Primary</label>
-    <label><input type="checkbox" data-group="neighborhood" checked> Neighborhood</label>
-    <label><input type="checkbox" data-group="smart" checked> SMART</label>
-    <label><input type="checkbox" data-group="qline" checked> QLINE Streetcar</label>
-  </div>
-
-  <!-- Browse + search mount (LT-KAES-33 / LT-S4). -->
-  <section id="lt-browse-panel" class="lt-region" aria-label="Browse routes and stops"></section>
-
-  <!-- Alerts region (LT-KAES-34 surface half / LT-S8). -->
-  <section id="lt-alerts" class="lt-region" aria-label="Service alerts"></section>
-
-  <!-- Planner surface mount — R4 host renders here (LT-KAES-29). -->
-  <section id="lt-planner" class="lt-region" aria-label="Plan a trip"></section>
-
-  <!-- Ride Along mount (LT-KAES-32 / LT-S6). -->
-  <section id="lt-ride-along" class="lt-region" aria-label="Ride along"></section>
-
-  <!-- Places layer controls (LT-KAES-35 / LT-S9): labeled
-       "Sponsored", default OFF, session-only — rendered by R5. -->
-  <section id="lt-places" class="lt-region" aria-label="Places"></section>
-
-  <section class="phl-about">
-    <h2>What you are looking at</h2>
-    <p>Route shapes and stop positions come from the agencies’ published GTFS schedule data; the bus markers are live vehicle positions from the agencies’ own feeds, published about every five minutes. Zoom in close and the markers resolve into true-scale bus models — each DDOT bus is matched to its fleet model (dimensions and seating from the DDOT fleet roster) and oriented to its reported heading. It is the same live layer that powered the retired Forge Line page’s bus count — the Forge Line concept itself was modeled on the transit Detroit already runs.</p>
-    <h2>About this service</h2>
-    <p>Route shapes & stops: DDOT, SMART, and QLINE GTFS. Bus dimensions & seating: DDOT fleet roster via CPTDB wiki. Street underlay: U.S. Census Bureau TIGER/Line 2025 (Wayne, Oakland & Macomb counties). Live data: DDOT via Clever Devices BusTime; SMART via Swiftly GTFS-Realtime; QLINE via its public GTFS-RT feed. Trademark notice: DDOT is a service mark of the City of Detroit. SMART is a service mark of the Suburban Mobility Authority for Regional Transportation. This is an unofficial project by Detroit Automation Academy — not affiliated with, endorsed by, or acting on behalf of DDOT, SMART, or the City of Detroit.</p>
-  </section>
-</main>
-
-<footer class="v2-foot">
-  <p><strong>Detroit Automation Academy</strong> · Southfield, Michigan · UAT build — not the production site.</p>
-</footer>
-<!-- The one application module (LT-KAES-06). Feature engines load
-     lazily through it (LT-KAES-05) — no classic-script sprawl. -->
+<script src="./live-transit/detroit/v2-chrome.js?v=20261101-0056"></script>
 <script type="module" src="./live-transit/detroit/modules/app.mjs?v=20261101-0056"></script>
 </body>
 </html>
