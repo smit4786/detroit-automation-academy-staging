@@ -29,14 +29,37 @@ export function createCamera({ fovDeg = DEFAULT_FOV_DEG, width = 960, height = 6
     setViewport(w, h) { cam.width = w; cam.height = h; },
     // Fit so the extent reads inside the frustum, padded — the
     // street grid is visible at first paint (LT-S2.2 / RC3).
+    // T4 (LTD V2 build, 2026-11-01): exact box fit. The previous
+    // fit inscribed the extent's diagonal circle in the vertical
+    // FOV (distance = r/t), which caps the scene's frame-height
+    // share near 53% at ANY aspect — proven in UAT round 2, where
+    // CSS aspect changes could not move it. This fit solves, per
+    // extent corner, the smallest distance at which the corner
+    // projects inside the frustum on both axes, in view space:
+    // for corner rel (ground plane, relative to target), with
+    // view basis (right, up, forward) — all distance-independent —
+    // the projected depth is rel·forward + d, so each axis gives
+    // d >= |rel·axis| / (tan * axisScale) - rel·forward. The max
+    // over the four corners is the exact fit; pad, the model's
+    // own distance clamps, azimuth and tilt are all preserved.
     fitToExtent(extent, pad = 1.08) {
       const cx = (extent.xMin + extent.xMax) / 2;
       const cz = (extent.zMin + extent.zMax) / 2;
-      const r = 0.5 * Math.hypot(extent.xMax - extent.xMin, extent.zMax - extent.zMin);
+      cam.target = { x: cx, z: cz };
       const t = Math.tan((cam.fovDeg * Math.PI) / 360);
       const aspect = cam.width / Math.max(1, cam.height);
-      cam.target = { x: cx, z: cz };
-      cam.distance = Math.max(r / t, r / (t * aspect)) * pad;
+      const { right, up, forward } = cam.basis();
+      let d = 0;
+      for (const px of [extent.xMin, extent.xMax]) {
+        for (const pz of [extent.zMin, extent.zMax]) {
+          const rx = px - cx, rz = pz - cz;
+          const vx = rx * right[0] + rz * right[2];
+          const vy = rx * up[0] + rz * up[2];
+          const vf = rx * forward[0] + rz * forward[2];
+          d = Math.max(d, Math.abs(vx) / (t * aspect) - vf, Math.abs(vy) / t - vf);
+        }
+      }
+      cam.distance = Math.max(120, Math.min(250000, d * pad));
       return cam;
     },
     // CG-12 fold: camera-memory + street-view seams. A snapshot is
