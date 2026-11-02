@@ -3,66 +3,91 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Signal — DAAD</title>
-<meta name="description" content="The Signal — a weekly letter from Detroit Automation Academy. Transit first.">
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#000; color:#fff; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; min-height:100vh; }
-  .wrap { max-width:880px; margin:0 auto; padding:0 16px 34px; animation:in .7s ease both; }
-  @keyframes in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
-  header.top { display:flex; justify-content:space-between; align-items:baseline; padding:22px 2px 16px; }
-  .wm { font-weight:800; font-size:19px; letter-spacing:.1em; }
-  .wm a { color:#fff; text-decoration:none; }
-  .wm small { display:block; font-size:8px; font-weight:600; letter-spacing:.4em; color:rgba(255,255,255,.45); margin-top:4px; }
-  nav.top { display:flex; gap:26px; }
-  nav.top a { color:rgba(255,255,255,.55); text-decoration:none; font-size:10px; font-weight:700; letter-spacing:.3em; text-transform:uppercase; transition:color .3s; }
-  nav.top a:hover, nav.top a.hot { color:#fff; }
-  .mast { border-top:1px solid rgba(255,255,255,.18); border-bottom:1px solid rgba(255,255,255,.18); padding:30px 2px 26px; }
-  .mast .k { font-size:9px; font-weight:600; letter-spacing:.42em; color:rgba(255,255,255,.42); text-transform:uppercase; }
-  .mast h1 { font-size:clamp(38px,8vw,64px); font-weight:800; letter-spacing:.1em; line-height:1.04; margin-top:12px; text-transform:uppercase; }
-  .mast p { margin-top:12px; font-size:13.5px; line-height:1.7; color:rgba(255,255,255,.62); max-width:560px; }
-  .latest { margin-top:26px; border:1px solid rgba(255,255,255,.22); padding:22px 22px 24px; }
-  .latest .k { font-size:9px; font-weight:700; letter-spacing:.32em; text-transform:uppercase; }
-  .latest .k span { background:#fff; color:#000; padding:2px 7px; margin-right:10px; }
-  .latest h2 { font-size:clamp(21px,4.4vw,30px); font-weight:800; letter-spacing:.03em; margin-top:14px; }
-  .latest .meta { margin-top:8px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; color:rgba(255,255,255,.5); }
-  .latest p { margin-top:12px; font-size:13.5px; line-height:1.75; color:rgba(255,255,255,.72); max-width:620px; }
-  .rows { margin-top:8px; }
-  .srow { display:flex; align-items:baseline; gap:16px; padding:16px 2px; border-bottom:1px solid rgba(255,255,255,.1); }
-  .srow .k { font-size:9px; font-weight:700; letter-spacing:.3em; color:rgba(255,255,255,.45); text-transform:uppercase; min-width:104px; }
-  .srow .v b { font-size:14px; font-weight:600; }
-  .srow .v small { display:block; font-size:11px; color:rgba(255,255,255,.45); margin-top:2px; }
-  footer { margin-top:26px; display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; font-size:9px; letter-spacing:.24em; color:rgba(255,255,255,.32); text-transform:uppercase; }
-  footer a { color:rgba(255,255,255,.5); text-decoration:none; }
-</style>
+<meta name="robots" content="noindex, nofollow">
+<title>The Signal — Detroit Automation Academy</title>
+<link rel="stylesheet" href="../v2-views.css?v=20261101-0056">
 </head>
 <body>
 <div class="wrap">
-  <header class="top">
-    <div class="wm"><a href="/">DAAD</a><small>Detroit Automation Academy</small></div>
-    <nav class="top"><a href="/">Live Transit</a><a href="/signal/" class="hot">Signal</a><a href="/press/">Press</a></nav>
+<header class="sh-head">
+    <a class="sh-wordmark" href="../">LIVE TRANSIT<small>Detroit Automation Academy</small></a>
+    <nav id="daaNavLinks" aria-label="Primary">
+      <a href="../live-transit.html">Live Transit</a><a href="../signal/" class="on">The Signal</a><a href="../press/">The Press</a>
+    </nav>
   </header>
+<main id="v2main">
 
-  <div class="mast">
-    <div class="k">A weekly letter · Fridays</div>
-    <h1>The Signal</h1>
-    <p>One letter a week on the systems that move Detroit — the buses first, then everything they connect to. Written plainly, checked against the record.</p>
-  </div>
+  <div class="mast"><div class="kick">The Signal · Weekly briefing</div>
+  <h1>The<br>Signal</h1>
+  <p class="stand">Detroit, in full sentences. Transit, automation, and the technology of a city that builds things — every Friday.</p></div>
 
-  <div class="latest">
-    <div class="k"><span>Latest</span>Edition 7</div>
+  <article class="feature">
+    <div class="kick">Latest · Edition 07 · Oct 30, 2026</div>
     <h2>Detroit Votes This Week</h2>
-    <div class="meta">Published October 30, 2026</div>
-    <p>Election Day is Tuesday, November 3. Polls are open 7:00 AM to 8:00 PM, and absentee ballots must be received by 8:00 PM to count. The buses run on their regular schedules — plan the trip the way you plan any other: early.</p>
+    <p>Detroit's final voting week — absentee applications close today at 5 p.m., eight early voting sites run through Sunday, registration stays open in person through 8 p.m. on Election Day, and the Academy's Detroit Voter Guide is live.</p>
+    <a class="rd" href="edition-07/">Read edition 07 →</a>
+  </article>
+
+  <div class="boardhead"><h3>All editions</h3><span>7 + series</span></div>
+  <div>
+      <a class="irow" href="edition-06/"><span class="no">06</span><span class="g"><b>The Week We Audited Ourselves</b><small>Weekly briefing</small></span><span class="dt">Oct 23, 2026</span></a>
+      <a class="irow" href="edition-05/"><span class="no">05</span><span class="g"><b>Every Stop, Counted</b><small>Weekly briefing</small></span><span class="dt">Oct 15, 2026</span></a>
+      <a class="irow" href="edition-04/"><span class="no">04</span><span class="g"><b>The Rulebook Changed Again — and the Robots Keep Moving to Detroit</b><small>Weekly briefing</small></span><span class="dt">Oct 5, 2026</span></a>
+      <a class="irow" href="edition-03/"><span class="no">03</span><span class="g"><b>Your Ballot, Decoded: The Detroit Voter Guide Is Live</b><small>Weekly briefing</small></span><span class="dt">Sep 28, 2026</span></a>
+      <a class="irow" href="edition-02/"><span class="no">02</span><span class="g"><b>BIOBUZZ, Week Two: The Three Bets That Win This Season</b><small>Weekly briefing</small></span><span class="dt">Sep 25, 2026</span></a>
+      <a class="irow" href="edition-01/"><span class="no">01</span><span class="g"><b>BIOBUZZ Is Here: What the New FTC Season Demands</b><small>Weekly briefing</small></span><span class="dt">Sep 23, 2026</span></a>
+  </div>
+  <div class="boardhead"><h3>Series + specials</h3><span>Detroit 2126 · specials</span></div>
+  <div>
+      <a class="irow" href="detroit-2126-02/"><span class="no">2126</span><span class="g"><b>Who Is It For?</b><small>Detroit 2126</small></span><span class="dt">Oct 5, 2026</span></a>
+      <a class="irow" href="detroit-2126-01/"><span class="no">2126</span><span class="g"><b>The Ride Is Free</b><small>Detroit 2126</small></span><span class="dt">Sep 30, 2026</span></a>
+      <a class="irow" href="special-uplift-defined/"><span class="no">SP</span><span class="g"><b>Uplift, Defined</b><small>Special</small></span><span class="dt">Oct 25, 2026</span></a>
+      <a class="irow" href="special-the-trip-your-app-doesnt-show-you/"><span class="no">SP</span><span class="g"><b>The Trip Your App Doesn&#x27;t Show You</b><small>Special</small></span><span class="dt">Oct 16, 2026</span></a>
+      <a class="irow" href="special-shut-down-by-the-meter/"><span class="no">SP</span><span class="g"><b>Shut Down by the Meter</b><small>Special</small></span><span class="dt">Oct 15, 2026</span></a>
+      <a class="irow" href="special-triumphant-return/"><span class="no">SP</span><span class="g"><b>The Triumphant Return</b><small>Special</small></span><span class="dt">Oct 15, 2026</span></a>
+      <a class="irow" href="special-live-transit/"><span class="no">SP</span><span class="g"><b>Every DDOT Bus, Live, in 3D</b><small>Special</small></span><span class="dt">Oct 5, 2026</span></a>
+      <a class="irow" href="special-accessibility/"><span class="no">SP</span><span class="g"><b>What the Pictures Say Now</b><small>Special</small></span><span class="dt">Oct 5, 2026</span></a>
+      <a class="irow" href="special-food-coop/"><span class="no">SP</span><span class="g"><b>Thirty Days to Keep the Doors Open</b><small>Special</small></span><span class="dt">Sep 29, 2026</span></a>
   </div>
 
-  <div class="rows">
-    <div class="srow"><span class="k">Cadence</span><span class="v"><b>Every Friday</b><small>A new edition each week. No noise between editions.</small></span></div>
-    <div class="srow"><span class="k">Archive</span><span class="v"><b>Editions 1–6</b><small>The archive returns to this page as the rebuild continues.</small></span></div>
-    <div class="srow"><span class="k">Also on</span><span class="v"><b>LinkedIn</b><small>Each edition is published to The Signal's LinkedIn newsletter as well.</small></span></div>
+  <div class="subbox">
+    <h3>Get The Signal</h3>
+    <p>One email, every Friday. No tracking pixels, no list rental, unsubscribe in one click.</p>
+    <form class="subform" id="sig-sub" novalidate>
+      <input type="email" id="sig-email" placeholder="you@example.com" aria-label="Email address" autocomplete="email">
+      <button type="submit">Subscribe</button>
+    </form>
+    <p class="substate" id="sig-state" role="status"></p>
   </div>
-
-  <footer><span>Detroit, Michigan</span><span><a href="/">Home</a> · <a href="/press/">The Press</a></span><span>&copy; 2026 DAAD</span></footer>
+<script>
+(function () {
+  var form = document.getElementById('sig-sub');
+  var state = document.getElementById('sig-state');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = document.getElementById('sig-email').value.trim();
+    if (!email || email.indexOf('@') < 1) { state.textContent = 'Enter a valid email address.'; return; }
+    state.textContent = 'Subscribing…';
+    /* GF-D3: daa-subscribe is the only write path. Confirmation is
+       shown ONLY on an ok reply; every failure lands on the labeled
+       unavailable line — never a fake success. */
+    fetch('https://api.detroitautomationacademy.com/api/subscribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (res.ok && res.j && res.j.already) state.innerHTML = '<b>Already subscribed.</b> That address is on the list.';
+        else if (res.ok) state.innerHTML = '<b>Subscribed.</b> The next edition lands Friday.';
+        else state.textContent = 'Subscribe is unavailable right now — the service did not confirm. Nothing was recorded; try again later.';
+      })
+      .catch(function () { state.textContent = 'Subscribe is unavailable right now — the service did not confirm. Nothing was recorded; try again later.'; });
+  });
+})();
+</script>
+</main>
+<footer class="sh-foot"><span>Detroit, Michigan</span><span>Black &amp; white standard</span><span>UAT staging</span></footer>
 </div>
+<script src="../v2-fs.js?v=20261101-0056"></script>
 </body>
 </html>

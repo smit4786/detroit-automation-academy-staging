@@ -1,0 +1,15 @@
+/* V2 article override — injected into legacy Signal/Press pages
+   (LTD V2 build 2026-11-01, T9) so archived reading surfaces meet
+   the B/W standard without rewriting their content: black field,
+   grayscale ramp, images rendered grayscale. Loaded AFTER the
+   page's own stylesheets. */
+html { background: #000 !important; }
+body { background: #000 !important; color: #e8e8e8 !important; }
+body * { border-color: rgba(255,255,255,.25) !important; }
+h1, h2, h3, h4, strong, b { color: #fff !important; }
+a { color: #fff !important; }
+a:hover { color: #fff !important; text-decoration: underline !important; }
+img, video, picture { filter: grayscale(1) !important; }
+header, footer, nav, section, article, main, aside, div, li, td, th { background-color: transparent !important; }
+code, pre { background: #0a0a0a !important; color: #e8e8e8 !important; }
+input, button, select, textarea { background: #000 !important; color: #fff !important; border: 1px solid rgba(255,255,255,.35) !important; }
