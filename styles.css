@@ -74,6 +74,9 @@
   --paper: #222222;
   --line: rgba(0,0,0,0.15);
   --radius: 14px;
+  --page-margin: 16px;
+  --panel-pad: 12px;
+  --gap: 12px;
 }
 
 /* Light-theme conformance (2026-11-02): explicit link + form-accent
@@ -491,6 +494,7 @@ a { color: inherit; }
 /* ---------- Mobile ---------- */
 @media (max-width: 760px) {
   .section { padding: 64px 0; }
+  .wrap { padding: 0 var(--page-margin); }
   .nav-links {
     position: absolute; top: 100%; left: 0; right: 0;
     flex-direction: column; align-items: stretch; gap: 0;
