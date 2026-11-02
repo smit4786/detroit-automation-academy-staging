@@ -4,7 +4,7 @@ export const BUILD_STAMP = '20261101-0056';
 export const CORE_STAMP = 't1-extract-1+01c77a2d';
 export const CONFIG_REV = '1+dd834873';
 export const ASSET_STAMPS = Object.freeze({
-  "plannerTimetableMd5": "2d37c09898e3fef66862db8989ffda03",
+  "plannerTimetableMd5": "0a383f5388405af74c7bf43bda4e594d",
   "feeds": [
     {
       "id": "ddot-static",

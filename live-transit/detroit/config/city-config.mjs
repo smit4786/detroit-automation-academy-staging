@@ -212,7 +212,7 @@ export const CITY_CONFIG = Object.freeze({
     // Planner assets: the merged DDOT+SMART timetable (the bundle
     // carries its own copy under planner/assets/, T6.2 base).
     plannerTimetable: 'planner-timetable-S1000182-S1000147.json', // [SRV M:4536]
-    plannerTimetableMd5: '2d37c09898e3fef66862db8989ffda03', // [PIN asset md5; == golden-corpus build copy]
+    plannerTimetableMd5: '0a383f5388405af74c7bf43bda4e594d', // [PIN asset md5; == golden-corpus build copy]
     // E4: Detroit declares the REAL sidecar the T6.2 base builds
     // from the asset (compiler-derived, verified 10,561 rows);
     // core surfaces hardcodes planner/assets/stops-sidecar.json
