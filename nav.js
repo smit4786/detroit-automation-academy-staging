@@ -17,6 +17,7 @@
     { label: 'Programs', href: '/programs.html', audience: 'visitor' },
     { label: 'Voter Guide', href: '/voter-guide.html', audience: 'visitor' },
     { label: 'The Signal', href: '/signal/', audience: 'reader' },
+    { label: 'The Index', href: '/the-index/', audience: 'reader' },
     { label: 'Contact', href: '/inquire.html', audience: 'visitor' },
     { label: 'Find', href: '/find.html', audience: 'visitor' }
   ];
@@ -28,6 +29,7 @@
     if (/^\/programs\.html/.test(path) || /^\/curriculum\//.test(path)) return 'Programs';
     if (/^\/voter-guide/.test(path)) return 'Voter Guide';
     if (/^\/signal\//.test(path)) return 'The Signal';
+    if (/^\/the-index\//.test(path)) return 'The Index';
     if (/^\/inquire\.html/.test(path)) return 'Contact';
     if (/^\/find\.html/.test(path)) return 'Find';
     return null;
