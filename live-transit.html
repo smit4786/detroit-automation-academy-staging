@@ -14,9 +14,9 @@
   .phl-wrap{max-width:1200px;margin:0 auto;padding:0 16px}
   .phl-head{padding:28px 0 10px}
   .phl-head h1{margin:0 0 6px;font-size:30px}
-  .phl-head p{margin:4px 0;color:#444;max-width:75ch}
-  #lt-status{font-weight:600;color:#323232;margin:8px 0}
-  #lt-map{width:100%;height:68vh;display:block;background:#0e0e0e;border:1px solid #222;border-radius:8px;touch-action:none}
+  .phl-head p{margin:4px 0;color:#5a5a5a;max-width:75ch}
+  #lt-status{font-weight:600;color:#222222;margin:8px 0}
+  #lt-map{width:100%;height:68vh;display:block;background:#f1f1f1;border:1px solid #d8d8d8;border-radius:8px;touch-action:none}
   .lt-region{margin:12px 0}
   /* Owner direction 2026-11-02: vertical alignment preferred —
      the layer-group toggles stack vertically, one per line. */
@@ -25,16 +25,21 @@
      stack under the map. The opacity control adjusts the route
      and vehicle layers live; 100% is the standard first paint. */
   #lt-map-controls{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:8px 0}
-  #lt-opacity-control{display:flex;flex-direction:column;gap:4px;font-weight:600;color:#323232}
-  #lt-opacity-range{writing-mode:vertical-lr;direction:rtl;height:96px;accent-color:#555}
-  /* Repair 2026-10-25 (contrast): the estate stylesheet sets a
-     light body text color (--paper #f2f2f2) for its dark theme;
-     these three panels pin LIGHT backgrounds, so their inherited
-     text rendered cream-on-cream (~1.05:1, illegible). Each
-     panel now pins a dark text color to match its background. */
-  #lt-load-error{display:none;border:1px solid #4c4c4c;border-radius:8px;padding:12px 14px;background:#f5f5f5;color:#2b2b2b}
-  #lt-degraded{display:none;border:1px solid #888888;border-radius:8px;padding:12px 14px;background:#fafafa;color:#383838}
-  #lt-info{display:none;border:1px solid #ccc;border-radius:8px;padding:12px 14px;background:#f9f9f9;max-width:75ch;color:#1e1e1e}
+  #lt-opacity-control{display:flex;flex-direction:column;gap:4px;font-weight:600;color:#222222}
+  #lt-opacity-range{writing-mode:vertical-lr;direction:rtl;height:96px;accent-color:#111111}
+  /* Panels pin light-theme token values (The Index set; estate
+     conformance 2026-11-02) so panel text stays legible whatever
+     the shared stylesheet body colors are. (Origin: the 2026-10-25
+     contrast repair, when the estate theme was dark.) */
+  #lt-load-error{display:none;border:1px solid #a8a8a8;border-radius:8px;padding:12px 14px;background:#f2f2f2;color:#222222}
+  #lt-degraded{display:none;border:1px solid #a8a8a8;border-radius:8px;padding:12px 14px;background:#f2f2f2;color:#222222}
+  #lt-info{display:none;border:1px solid #d8d8d8;border-radius:8px;padding:12px 14px;background:#ffffff;max-width:75ch;color:#222222}
+  /* Light-theme conformance (2026-11-02): shell-level link +
+     form-accent grays (the shared stylesheet carries the same). */
+  a{color:#111111}
+  a:visited{color:#5a5a5a}
+  a:active{color:#111111}
+  input{accent-color:#111111}
 </style>
 <!-- Vendored rendering library, declared once (LT-KAES-05).
      R3 vendors three.module.min.js at this path; the importmap is

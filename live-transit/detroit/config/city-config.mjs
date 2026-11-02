@@ -452,9 +452,12 @@ export const CITY_CONFIG = Object.freeze({
 
   // ---- Scene / motion / alert FX / filters / beta (schema v2.2 fold) --------
   scene: Object.freeze({
-    // Water colours asserted by hourly-check-554 against the
-    // monolith: deep 0x1f1f1f, neon 0xb6b6b6 (decimals here).
-    waterColors: Object.freeze({ deep: 2039583, neon: 11974326 }), // 0x1f1f1f / 0xb6b6b6 [CEN CG-12]
+    // Water colours (decimals here). The CG-12 monolith values
+    // were deep 0x1f1f1f, neon 0xb6b6b6; the light-theme
+    // conformance (2026-11-02) inverted both by luminance
+    // (v -> 255 - v). NOTE: the hourly-check-554 parity baseline
+    // predates this inversion and needs re-baselining.
+    waterColors: Object.freeze({ deep: 14737632, neon: 4802889 }), // 0xe0e0e0 / 0x494949 — inverted 2026-11-02
     stopLodDistM: 26000, // STOP_LOD_DIST = 26000 (M)          [CEN CG-12]
     streetView: true, // enterStreetView/exitStreetView (M:1911-2333) [CEN CG-12]
     // Camera memory exists (camMem, M:2141-2166) but is

@@ -63,19 +63,19 @@
    * surface lights for real, this block graduates into styles.css
    * with the standing site-wide stamp bump (design §5). */
   var CSS = [
-    '.daa-ad{margin:2.5rem 0 0;border:1px solid var(--line,rgba(242,242,242,.09));',
-    'background:var(--card,#191919);border-radius:14px;padding:22px 24px;}',
+    '.daa-ad{margin:2.5rem 0 0;border:1px solid var(--line,rgba(0,0,0,.15));',
+    'background:var(--card,#ffffff);border-radius:14px;padding:22px 24px;}',
     '.daa-ad-label{display:inline-block;font-size:.72rem;font-weight:600;',
-    'letter-spacing:.08em;text-transform:uppercase;color:var(--amber,#b4b4b4);',
-    'border:1px solid var(--line,rgba(242,242,242,.09));border-radius:999px;',
+    'letter-spacing:.08em;text-transform:uppercase;color:var(--amber,#111111);',
+    'border:1px solid var(--line,rgba(0,0,0,.15));border-radius:999px;',
     'padding:3px 10px;margin:0 0 12px;}',
-    '.daa-ad-kicker{margin:0 0 4px;font-size:.8rem;color:var(--concrete,#9f9f9f);}',
+    '.daa-ad-kicker{margin:0 0 4px;font-size:.8rem;color:var(--concrete,#5a5a5a);}',
     '.daa-ad-headline{margin:0 0 6px;font-size:1.15rem;font-weight:600;',
-    'color:var(--paper,#f2f2f2);}',
-    '.daa-ad-body{margin:0 0 14px;color:var(--concrete,#9f9f9f);max-width:60ch;}',
+    'color:var(--paper,#222222);}',
+    '.daa-ad-body{margin:0 0 14px;color:var(--concrete,#5a5a5a);max-width:60ch;}',
     '.daa-ad-cta{display:inline-block;min-height:44px;line-height:44px;',
-    'font-weight:600;color:var(--forge,#767676);text-decoration:none;}',
-    '.daa-ad-cta:hover{color:var(--amber,#b4b4b4);}',
+    'font-weight:600;color:var(--forge,#5a5a5a);text-decoration:none;}',
+    '.daa-ad-cta:hover{color:var(--amber,#111111);}',
     '.daa-ad-mount[data-ad-slot="signal-article-end"] .daa-ad{max-width:720px;}',
     '.daa-ad a{text-decoration:none;}'
   ].join('');

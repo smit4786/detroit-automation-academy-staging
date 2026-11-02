@@ -202,7 +202,7 @@ export async function createRenderer(canvas = null, opts = {}) {
     const renderer3 = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer3.setSize(model.camera.width, model.camera.height, false);
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0e0e0e);
+    scene.background = new THREE.Color(0xf1f1f1);
     const camera3 = new THREE.PerspectiveCamera(
       model.camera.fovDeg, model.camera.width / Math.max(1, model.camera.height), 10, 600000);
     scene.add(new THREE.AmbientLight(0xffffff, 0.75));
@@ -355,7 +355,7 @@ export async function createRenderer(canvas = null, opts = {}) {
       scene.add(grp);
       gl.routeGroups[g.id] = grp;
     }
-    const casingMat = regOpacityMat('routes', new THREE.MeshBasicMaterial({ color: 0x101010, transparent: true, side: THREE.DoubleSide }), 0.9);
+    const casingMat = regOpacityMat('routes', new THREE.MeshBasicMaterial({ color: 0xefefef, transparent: true, side: THREE.DoubleSide }), 0.9);
     const byRoute = new Map();
     for (const rb of S.ribbons) {
       if (!byRoute.has(rb.routeId)) byRoute.set(rb.routeId, []);
@@ -396,7 +396,7 @@ export async function createRenderer(canvas = null, opts = {}) {
     S.stops.forEach((st, i) => { stopPos.set([st.x, HEIGHTS.deckBase, st.z], i * 3); });
     const sg = new THREE.BufferGeometry();
     sg.setAttribute('position', new THREE.BufferAttribute(stopPos, 3));
-    const points = new THREE.Points(sg, regOpacityMat('stops', new THREE.PointsMaterial({ color: 0xb1b1b1, size: 5, sizeAttenuation: false, transparent: true }), 1));
+    const points = new THREE.Points(sg, regOpacityMat('stops', new THREE.PointsMaterial({ color: 0x4e4e4e, size: 5, sizeAttenuation: false, transparent: true }), 1));
     points.name = 'stops';
     points.frustumCulled = false;
     scene.add(points);
@@ -435,7 +435,7 @@ export async function createRenderer(canvas = null, opts = {}) {
         grp.add(new THREE.Mesh(bufferGeometry(THREE, rb.deck), deckMat));
       }
       // Station pins + support pillars (stations only, no infill).
-      const pinMat = new THREE.MeshLambertMaterial({ color: 0xf2f2f2 });
+      const pinMat = new THREE.MeshLambertMaterial({ color: 0x0d0d0d });
       for (const st of layer.stations) {
         const pin = new THREE.Mesh(new THREE.CylinderGeometry(24, 32, 300, 12), pinMat);
         pin.position.set(st.x, layer.deckY + 150, st.z);
@@ -448,7 +448,7 @@ export async function createRenderer(canvas = null, opts = {}) {
         grp.add(pillar);
         const ring = new THREE.Mesh(
           new THREE.RingGeometry(40, 64, 32),
-          new THREE.MeshBasicMaterial({ color: 0xf2f2f2, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false }));
+          new THREE.MeshBasicMaterial({ color: 0x0d0d0d, transparent: true, opacity: 0.45, side: THREE.DoubleSide, depthWrite: false }));
         ring.rotation.x = -Math.PI / 2;
         ring.position.set(st.x, layer.deckY + 3, st.z);
         grp.add(ring);
@@ -523,9 +523,9 @@ export async function createRenderer(canvas = null, opts = {}) {
       grp.add(glow);
       if (pl.badge.text) {
         const badge = canvasSprite((x, w, h) => {
-          x.fillStyle = 'rgba(12,12,12,0.88)';
+          x.fillStyle = 'rgba(243,243,243,0.88)';
           x.beginPath(); x.arc(64, 64, 52, 0, Math.PI * 2); x.fill();
-          x.fillStyle = '#ffffff'; x.font = '700 52px system-ui, sans-serif';
+          x.fillStyle = '#000000'; x.font = '700 52px system-ui, sans-serif';
           x.textAlign = 'center'; x.textBaseline = 'middle';
           x.fillText(pl.badge.text, 64, 66);
         });
@@ -552,7 +552,7 @@ export async function createRenderer(canvas = null, opts = {}) {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       const points = new THREE.Points(g, new THREE.PointsMaterial({
-        color: 0xd3d3d3, size: 9, sizeAttenuation: false }));
+        color: 0x2c2c2c, size: 9, sizeAttenuation: false }));
       points.name = `external-${layerId}`;
       points.frustumCulled = false;
       grp.add(points);
@@ -574,8 +574,8 @@ export async function createRenderer(canvas = null, opts = {}) {
       const c = document.createElement('canvas');
       c.width = 256; c.height = 16;
       const x = c.getContext('2d');
-      x.fillStyle = '#434343'; x.fillRect(0, 0, 128, 16);
-      x.fillStyle = '#f2f2f2'; x.fillRect(128, 0, 42, 16);
+      x.fillStyle = '#bcbcbc'; x.fillRect(0, 0, 128, 16);
+      x.fillStyle = '#0d0d0d'; x.fillRect(128, 0, 42, 16);
       const t = new THREE.CanvasTexture(c);
       t.wrapS = THREE.RepeatWrapping;
       return t;
@@ -587,7 +587,7 @@ export async function createRenderer(canvas = null, opts = {}) {
           new THREE.MeshBasicMaterial({ map: dashTex, transparent: true, side: THREE.DoubleSide, depthWrite: false })));
       } else {
         grp.add(new THREE.Mesh(bufferGeometry(THREE, geo),
-          new THREE.MeshBasicMaterial({ color: 0x070707, transparent: true, opacity: rb.opacity || 0.45, side: THREE.DoubleSide, depthWrite: false })));
+          new THREE.MeshBasicMaterial({ color: 0xf8f8f8, transparent: true, opacity: rb.opacity || 0.45, side: THREE.DoubleSide, depthWrite: false })));
       }
     }
     for (const g of fx.glyphs) {
@@ -616,7 +616,7 @@ export async function createRenderer(canvas = null, opts = {}) {
       if (st.ring !== 'moved') continue;
       const mesh = new THREE.Mesh(
         new THREE.RingGeometry(26, 42, 32),
-        new THREE.MeshBasicMaterial({ color: 0x8e8e8e, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false }));
+        new THREE.MeshBasicMaterial({ color: 0x717171, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false }));
       mesh.rotation.x = -Math.PI / 2;
       mesh.position.set(st.x, 22, st.z);
       grp.add(mesh);
@@ -654,7 +654,7 @@ export async function createRenderer(canvas = null, opts = {}) {
         // REQ-V-6: body tone = the route gradient's mid value;
         // REQ-V-7: bodies register under 'vehicles' (fleetMats).
         regOpacityMat('vehicles', new THREE.MeshLambertMaterial({
-          color: g.gradient ? g.gradient.midCss : (g.color || 0xececec), transparent: true,
+          color: g.gradient ? g.gradient.midCss : (g.color || 0x131313), transparent: true,
         }), 1, fleetMats));
       body.position.set(g.x, f.height_m / 2, g.z);
       if (typeof g.heading === 'number') body.rotation.y = g.heading;
@@ -707,7 +707,7 @@ export async function createRenderer(canvas = null, opts = {}) {
       let tex, scale = 900;
       if (g.kind === GLYPH.UNASSIGNED) {
         tex = mkTex((x) => {
-          x.strokeStyle = '#b3b3b3'; x.lineWidth = 5;
+          x.strokeStyle = '#4c4c4c'; x.lineWidth = 5;
           x.beginPath(); x.moveTo(32, 6); x.lineTo(58, 32); x.lineTo(32, 58); x.lineTo(6, 32); x.closePath(); x.stroke();
         });
         scale = 700;
@@ -727,10 +727,10 @@ export async function createRenderer(canvas = null, opts = {}) {
             grad.addColorStop(1, grayCss(spec.to));
             x.fillStyle = grad;
           } else {
-            x.fillStyle = g.color || '#ececec';
+            x.fillStyle = g.color || '#131313';
           }
           x.beginPath(); x.arc(32, 32, 24, 0, Math.PI * 2); x.fill();
-          x.lineWidth = 4; x.strokeStyle = '#0e0e0e'; x.stroke();
+          x.lineWidth = 4; x.strokeStyle = '#f1f1f1'; x.stroke();
         });
       }
       const sp = new THREE.Sprite(regOpacityMat('vehicles', new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }), 1));

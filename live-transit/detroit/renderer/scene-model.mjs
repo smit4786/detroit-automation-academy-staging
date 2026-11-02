@@ -98,22 +98,22 @@ export const STREET_VIEW = Object.freeze({ enterDistM: 1500, exitDistM: 2600, an
 
 /** Extra-land pass colours (CG-12): filled land polygon + shore
  *  stroke, rendered with the water/land pass. */
-export const EXTRA_LAND = Object.freeze({ fillColor: 0x101010, shoreColor: 0x434343, y: 3 });
+export const EXTRA_LAND = Object.freeze({ fillColor: 0xefefef, shoreColor: 0xbcbcbc, y: 3 });
 
 /** Alert FX vocabulary (CG-11, monolith ALERT_FX semantics):
  *  effect -> glyph/label/colour. GTFS effect names, no city data. */
 export const ALERT_FX = Object.freeze({
-  NO_SERVICE: { glyph: '✕', label: 'No service', css: '#a2a2a2' },
-  DETOUR: { glyph: '↪', label: 'Detour', css: '#a2a2a2' },
-  REDUCED_SERVICE: { glyph: '◑', label: 'Reduced service', css: '#b4b4b4' },
-  STOP_MOVED: { glyph: '⇄', label: 'Stop moved', css: '#8e8e8e' },
-  INFO: { glyph: 'ℹ', label: 'Notice', css: '#9f9f9f' },
+  NO_SERVICE: { glyph: '✕', label: 'No service', css: '#5d5d5d' },
+  DETOUR: { glyph: '↪', label: 'Detour', css: '#5d5d5d' },
+  REDUCED_SERVICE: { glyph: '◑', label: 'Reduced service', css: '#4b4b4b' },
+  STOP_MOVED: { glyph: '⇄', label: 'Stop moved', css: '#717171' },
+  INFO: { glyph: 'ℹ', label: 'Notice', css: '#606060' },
 });
-export const ALERT_FX_FALLBACK = Object.freeze({ glyph: '⚠', label: 'Service alert', css: '#a2a2a2' });
+export const ALERT_FX_FALLBACK = Object.freeze({ glyph: '⚠', label: 'Service alert', css: '#5d5d5d' });
 export function alertFxFor(effect) {
   if (effect && ALERT_FX[effect]) return ALERT_FX[effect];
   if (effect === 'SIGNIFICANT_DELAYS' || effect === 'MODIFIED_SERVICE' || effect === 'ACCESSIBILITY_ISSUE') {
-    return { glyph: '⚠', label: ALERT_FX_FALLBACK.label, css: '#a2a2a2' };
+    return { glyph: '⚠', label: ALERT_FX_FALLBACK.label, css: '#5d5d5d' };
   }
   if (effect === 'ADDITIONAL_SERVICE') return ALERT_FX.INFO;
   return ALERT_FX_FALLBACK;
@@ -156,10 +156,10 @@ export const HEIGHTS = Object.freeze({
 });
 
 const TIER_Y = { freeway: HEIGHTS.streetFreeway, arterial: HEIGHTS.streetArterial, local: HEIGHTS.streetLocal };
-const TIER_COLOR = { freeway: 0x939393, arterial: 0x565656, local: 0x3b3b3b };
-export const WATER_COLOR = 0x393939;
-export const LANDMARK_COLOR = 0x484848;
-export const UNASSIGNED_COLOR = 0x8f8f8f;
+const TIER_COLOR = { freeway: 0x6c6c6c, arterial: 0xa9a9a9, local: 0xc4c4c4 };
+export const WATER_COLOR = 0xc6c6c6;
+export const LANDMARK_COLOR = 0xb7b7b7;
+export const UNASSIGNED_COLOR = 0x707070;
 
 /** Route resolution with the R2-measured OWL rule (base id fallback). */
 export function resolveRouteId(routeById, routeId) {
@@ -376,7 +376,7 @@ export function createSceneModel({ width = 960, height = 640, storage = null } =
     const paths = [];
     if (Array.isArray(doc.loop) && doc.loop.length >= 2) paths.push(doc.loop);
     for (const path of doc.paths || []) if (Array.isArray(path) && path.length >= 2) paths.push(path);
-    let color = hexColor(entry.color ?? doc.color, 0x9f9f9f);
+    let color = hexColor(entry.color ?? doc.color, 0x606060);
     for (const r of doc.routes || []) {
       for (const path of r.paths || []) if (Array.isArray(path) && path.length >= 2) paths.push(path);
       if (r.color != null) color = hexColor(r.color, color);
@@ -514,7 +514,7 @@ export function createSceneModel({ width = 960, height = 640, storage = null } =
       if (!rec) continue;
       const xy = xyOf(rec);
       if (!xy) continue;
-      const color = hexColor(rec.color, 0x8f8f8f);
+      const color = hexColor(rec.color, 0x707070);
       S.places3d.push({
         record: rec, id: rec.id != null ? String(rec.id) : null,
         name: rec.name || rec.n || '', x: xy[0], z: xy[1],
@@ -797,7 +797,7 @@ export function createSceneModel({ width = 960, height = 640, storage = null } =
         });
         const addPulse = (st) => fx.pulseRings.push({
           alertId: a.id || null, stopId: String(st.id), x: st.x, z: st.z, y: 22,
-          rInner: 34, rOuter: 58, color: 0xb4b4b4, phase: fx.pulseRings.length * 1.7,
+          rInner: 34, rOuter: 58, color: 0x4b4b4b, phase: fx.pulseRings.length * 1.7,
         });
         if (a.effect === 'NO_SERVICE' || a.effect === 'DETOUR') {
           for (const span of alertSpanPaths(route, namedStops)) {

@@ -16,6 +16,9 @@
 // and G83..G87 are reserve. The full route -> token table is
 // ATOMIC-GRADIENTS.md at the build-tree root.
 //
+// THEME CONFORMANCE (2026-11-02): token ASSIGNMENTS unchanged
+// (registry order -> ATOMIC-<n>; QLINE = G82); only the ramp
+// VALUES were re-expressed for the light ground (see above).
 // REQ-V-7 (owner-directed BEHAVIOR, same directive): LAYER_OPACITY
 // below is the token set the renderer's layer materials read;
 // the defaults are exactly the values the V1-derived renderer
@@ -26,20 +29,27 @@
 /** Direction angles of the family, degrees (CSS convention). */
 export const GRADIENT_ANGLES = Object.freeze([0, 45, 90, 135, 180, 225, 270, 315]);
 
-/** Base ramps as [from, to] gray bytes — light end first; the
- *  angle supplies direction, so ramps are value pairs only. */
+/** Base ramps as [from, to] gray bytes — anchor end first; the
+ *  angle supplies direction, so ramps are value pairs only.
+ *  LIGHT-GROUND RE-EXPRESSION (2026-11-02, theme conformance):
+ *  the dark-ground ramps [0x26..0xf0] were mapped byte-wise by
+ *  v' = round(20 + (240 - v) / 202 * 118) onto [0x14, 0x8a] with
+ *  roles inverted (the old light end is the new dark anchor).
+ *  Every byte is <= 0x8a, so every ramp point keeps >= 3:1
+ *  against the scene ground 0xf1f1f1 (WCAG luminance ratio;
+ *  0x8a = 3.06:1, and 0x8c would already fall to 2.98:1). */
 export const GRADIENT_RAMPS = Object.freeze([
-  Object.freeze([0xf0, 0x26]),
-  Object.freeze([0xdb, 0x38]),
-  Object.freeze([0xc7, 0x4d]),
-  Object.freeze([0xb3, 0x61]),
-  Object.freeze([0xf0, 0x61]),
-  Object.freeze([0xdb, 0x26]),
-  Object.freeze([0xc7, 0x26]),
-  Object.freeze([0xb3, 0x38]),
-  Object.freeze([0x9e, 0x26]),
-  Object.freeze([0xf0, 0x4d]),
-  Object.freeze([0xc7, 0x38]),
+  Object.freeze([0x14, 0x8a]),
+  Object.freeze([0x20, 0x7f]),
+  Object.freeze([0x2c, 0x73]),
+  Object.freeze([0x38, 0x68]),
+  Object.freeze([0x14, 0x68]),
+  Object.freeze([0x20, 0x8a]),
+  Object.freeze([0x2c, 0x8a]),
+  Object.freeze([0x38, 0x7f]),
+  Object.freeze([0x44, 0x8a]),
+  Object.freeze([0x14, 0x73]),
+  Object.freeze([0x2c, 0x7f]),
 ]);
 
 const hex2 = (b) => b.toString(16).padStart(2, '0');
@@ -150,11 +160,11 @@ function classSpec(id, from, to, angleDeg = 90) {
   });
 }
 export const VEHICLE_CLASS_GRADIENTS = Object.freeze({
-  ddot: classSpec('VC-ddot', 0xf0, 0x4d),
-  smart: classSpec('VC-smart', 0xdb, 0x26),
-  qline: classSpec('VC-qline', 0xc7, 0x38),
-  stale: classSpec('VC-stale', 0x8a, 0x61),
-  unassigned: classSpec('VC-unassigned', 0xb3, 0xb3),
+  ddot: classSpec('VC-ddot', 0x14, 0x73),
+  smart: classSpec('VC-smart', 0x20, 0x8a),
+  qline: classSpec('VC-qline', 0x2c, 0x7f),
+  stale: classSpec('VC-stale', 0x50, 0x68),
+  unassigned: classSpec('VC-unassigned', 0x38, 0x38),
 });
 /** Class spec for a feed id ('ddot' | 'smart' | 'qline' |
  *  'stale' | 'unassigned'); null when the feed is unknown. */
