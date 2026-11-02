@@ -114,6 +114,7 @@
   <section id="projects"><h2>Projects</h2>
     <p class="lede">Every project board on file, with the state of its items at generation time.</p>
     <div class="scroll"><table id="projects-table"></table></div>
+    <p class="src" id="projects-excluded"></p>
   </section>
 
   <section id="gates"><h2>Decision gates</h2>
@@ -228,10 +229,11 @@
       blocks.appendChild(panel);
     });
 
-    /* Projects */
+    /* Projects — internal boards never render (existence-count only) */
+    var pubBoards=reg.projects.filter(function(b){ return !b.internal; });
     tableInto('projects-table',
       [{t:'№'},{t:'Project'},{t:'Items',num:1},{t:'Done',num:1},{t:'In progress',num:1},{t:'To do',num:1},{t:'Board'}],
-      reg.projects.map(function(b){
+      pubBoards.map(function(b){
         var tr=el('tr');
         tr.appendChild(cell(String(b.number)));
         var name=cell(null); var a=el('a', b.title); a.href=b.url; name.appendChild(a); tr.appendChild(name);
@@ -243,6 +245,9 @@
         tr.appendChild(cell(b.closed?'Closed':'Open'));
         return tr;
       }));
+    var exB=reg.projects.length-pubBoards.length;
+    document.getElementById('projects-excluded').textContent =
+      exB>0 ? exB+' further project boards are internal working records and are not published on this page.' : '';
 
     /* Gates — internal entries never render */
     var pub=reg.gates.filter(function(g){ return !g.internal; });

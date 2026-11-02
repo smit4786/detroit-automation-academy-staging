@@ -2,6 +2,7 @@
  "counts": {
   "board_items": 524,
   "boards": 71,
+  "boards_internal_excluded": 11,
   "gates_decided": 18,
   "gates_internal_excluded": 4,
   "gates_open": 10,
@@ -364,8 +365,8 @@
    "state": "DECIDED"
   }
  ],
- "generated_at": "2026-11-02T15:10:19.436964+00:00",
- "generated_at_local": "2026-11-02 10:10 EST",
+ "generated_at": "2026-11-02T15:31:35.057334+00:00",
+ "generated_at_local": "2026-11-02 10:31 EST",
  "implementations": [
   {
    "anchor": "Production sitemap \u00b7 Board 70",
@@ -840,15 +841,9 @@
    "url": "https://github.com/users/smit4786/projects/13"
   },
   {
-   "by_status": {
-    "Done": 3,
-    "Todo": 1
-   },
    "closed": false,
-   "items_total": 4,
-   "number": 14,
-   "title": "Serverless Data Encryption \u2014 Research",
-   "url": "https://github.com/users/smit4786/projects/14"
+   "internal": true,
+   "number": 14
   },
   {
    "by_status": {
@@ -895,14 +890,9 @@
    "url": "https://github.com/users/smit4786/projects/18"
   },
   {
-   "by_status": {
-    "Done": 7
-   },
    "closed": false,
-   "items_total": 7,
-   "number": 19,
-   "title": "Lessons Learned \u2014 Actionable Updates to Memory & SOPs",
-   "url": "https://github.com/users/smit4786/projects/19"
+   "internal": true,
+   "number": 19
   },
   {
    "by_status": {
@@ -949,15 +939,9 @@
    "url": "https://github.com/users/smit4786/projects/23"
   },
   {
-   "by_status": {
-    "Done": 5,
-    "Todo": 3
-   },
    "closed": false,
-   "items_total": 8,
-   "number": 24,
-   "title": "Live Transit \u2014 Pass Distribution",
-   "url": "https://github.com/users/smit4786/projects/24"
+   "internal": true,
+   "number": 24
   },
   {
    "by_status": {
@@ -1004,16 +988,9 @@
    "url": "https://github.com/users/smit4786/projects/28"
   },
   {
-   "by_status": {
-    "Done": 3,
-    "In Progress": 1,
-    "Todo": 2
-   },
    "closed": false,
-   "items_total": 6,
-   "number": 29,
-   "title": "Apple Watch \u2014 Live Transit",
-   "url": "https://github.com/users/smit4786/projects/29"
+   "internal": true,
+   "number": 29
   },
   {
    "by_status": {
@@ -1026,14 +1003,9 @@
    "url": "https://github.com/users/smit4786/projects/30"
   },
   {
-   "by_status": {
-    "Done": 6
-   },
    "closed": false,
-   "items_total": 6,
-   "number": 31,
-   "title": "Environmental Resilience \u2014 Authentication Layer & Signed Inter-Agent Communications",
-   "url": "https://github.com/users/smit4786/projects/31"
+   "internal": true,
+   "number": 31
   },
   {
    "by_status": {
@@ -1076,14 +1048,9 @@
    "url": "https://github.com/users/smit4786/projects/35"
   },
   {
-   "by_status": {
-    "Done": 4
-   },
    "closed": false,
-   "items_total": 4,
-   "number": 36,
-   "title": "DAA Uplift U5 \u2014 Console Surface Determination & Hardening",
-   "url": "https://github.com/users/smit4786/projects/36"
+   "internal": true,
+   "number": 36
   },
   {
    "by_status": {
@@ -1146,15 +1113,9 @@
    "url": "https://github.com/users/smit4786/projects/42"
   },
   {
-   "by_status": {
-    "In Progress": 4,
-    "Todo": 6
-   },
    "closed": false,
-   "items_total": 10,
-   "number": 43,
-   "title": "AutomatedTechnologies \u2014 Complete Uplift",
-   "url": "https://github.com/users/smit4786/projects/43"
+   "internal": true,
+   "number": 43
   },
   {
    "by_status": {
@@ -1345,15 +1306,9 @@
    "url": "https://github.com/users/smit4786/projects/60"
   },
   {
-   "by_status": {
-    "Done": 3,
-    "Todo": 4
-   },
    "closed": false,
-   "items_total": 7,
-   "number": 61,
-   "title": "Municipal Bus Augmentation",
-   "url": "https://github.com/users/smit4786/projects/61"
+   "internal": true,
+   "number": 61
   },
   {
    "by_status": {
@@ -1368,16 +1323,9 @@
    "url": "https://github.com/users/smit4786/projects/62"
   },
   {
-   "by_status": {
-    "Done": 2,
-    "In Progress": 1,
-    "Todo": 5
-   },
    "closed": false,
-   "items_total": 8,
-   "number": 63,
-   "title": "iPadOS \u2014 Keyboard & Mouse Uplift",
-   "url": "https://github.com/users/smit4786/projects/63"
+   "internal": true,
+   "number": 63
   },
   {
    "by_status": {
@@ -1413,14 +1361,9 @@
    "url": "https://github.com/users/smit4786/projects/66"
   },
   {
-   "by_status": {
-    "Todo": 4
-   },
    "closed": false,
-   "items_total": 4,
-   "number": 67,
-   "title": "Rejection Acquisition Program \u2014 100 by 2028",
-   "url": "https://github.com/users/smit4786/projects/67"
+   "internal": true,
+   "number": 67
   },
   {
    "by_status": {
@@ -1467,15 +1410,9 @@
    "url": "https://github.com/users/smit4786/projects/71"
   },
   {
-   "by_status": {
-    "Done": 2,
-    "Todo": 8
-   },
    "closed": false,
-   "items_total": 10,
-   "number": 72,
-   "title": "Estate Threat Detection + Mitigation",
-   "url": "https://github.com/users/smit4786/projects/72"
+   "internal": true,
+   "number": 72
   }
  ],
  "release_views": [
@@ -1555,7 +1492,7 @@
  "schema": "the-index/registry 1",
  "sitemaps": {
   "production": {
-   "commit_date": "2026-11-02T15:08:22Z",
+   "commit_date": "2026-11-02T15:31:17Z",
    "groups": {
     ".github/workflows/ \u2014 publication workflows": 9,
     "live-data/ \u2014 Detroit live plane (root payloads)": 5,
@@ -1571,29 +1508,31 @@
     "live-transit/sacramento/data/ \u2014 city data chain": 74,
     "live-transit/san-diego/data/ \u2014 city data chain": 173
    },
-   "head": "43616c00b944a82cff26ef48a931046e31657edd",
-   "head_short": "43616c00",
+   "head": "8ec5976a509b8165fdcac456bd57663fd99f2ba5",
+   "head_short": "8ec5976a",
    "html_routes": [
     "404.html",
     "index.html"
    ],
    "repo": "AutomatedTechnologies/detroit-automation-academy-public",
    "total_blobs": 1839,
-   "tree": "43616c00b944a82cff26ef48a931046e31657edd",
+   "tree": "8ec5976a509b8165fdcac456bd57663fd99f2ba5",
    "truncated": false
   },
   "uat": {
-   "commit_date": "2026-11-02T14:49:37Z",
+   "commit_date": "2026-11-02T15:20:54Z",
    "groups": {
     "press/ \u2014 brief pages": 248,
     "press/ \u2014 index, media kit, data, assets": 5,
-    "shared assets (nav, styles)": 7
+    "shared assets (nav, styles)": 87
    },
-   "head": "c49a39cd330fe821237829c4a1cd57462ee89633",
-   "head_short": "c49a39cd",
+   "head": "fa1d5e6fc2fb3aa40ceceed217426f08796f4fa8",
+   "head_short": "fa1d5e6f",
    "html_routes": [
     "404.html",
     "index.html",
+    "live-transit.html",
+    "live-transit/terms/index.html",
     "press/1-679-fires-recorded-in-brazil-s-amazonas-state-in-first-two-weeks-of/index.html",
     "press/11th-circuit-allows-florida-to-enforce-law-barring-children-under-14-f/index.html",
     "press/40-state-attorneys-general-urge-delaware-bankruptcy-judge-to-protect-c/index.html",
@@ -1843,11 +1782,30 @@
     "press/vatican-says-pope-leo-spent-a-peaceful-night-in-hospital-after-lung-ca/index.html",
     "press/wayne-county-prosecutor-s-office-says-evidence-in-taylor-target-lotion/index.html",
     "press/whistleblower-in-new-york-times-lawsuit-gives-interview/index.html",
-    "press/zelenskiy-says-ukraine-will-resume-strikes-on-russian-refineries-the-f/index.html"
+    "press/zelenskiy-says-ukraine-will-resume-strikes-on-russian-refineries-the-f/index.html",
+    "signal/detroit-2126-01/index.html",
+    "signal/detroit-2126-02/index.html",
+    "signal/edition-01/index.html",
+    "signal/edition-02/index.html",
+    "signal/edition-03/index.html",
+    "signal/edition-04/index.html",
+    "signal/edition-05/index.html",
+    "signal/edition-06/index.html",
+    "signal/edition-07/index.html",
+    "signal/index.html",
+    "signal/relaunch/index.html",
+    "signal/special-accessibility/index.html",
+    "signal/special-food-coop/index.html",
+    "signal/special-live-transit/index.html",
+    "signal/special-shut-down-by-the-meter/index.html",
+    "signal/special-the-trip-your-app-doesnt-show-you/index.html",
+    "signal/special-triumphant-return/index.html",
+    "signal/special-uplift-defined/index.html",
+    "the-index/index.html"
    ],
    "repo": "smit4786/detroit-automation-academy-staging",
-   "total_blobs": 262,
-   "tree": "c49a39cd330fe821237829c4a1cd57462ee89633",
+   "total_blobs": 342,
+   "tree": "fa1d5e6fc2fb3aa40ceceed217426f08796f4fa8",
    "truncated": false
   }
  },
