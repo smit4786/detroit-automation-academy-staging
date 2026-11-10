@@ -1,0 +1,538 @@
+{
+  "generated_at": "2026-11-10T04:10:13.030Z",
+  "count": 47,
+  "vehicles": [
+    {
+      "agency": "ddot",
+      "route_id": "1",
+      "vehicle_id": "1829",
+      "lat": 42.328639793291444,
+      "lon": -83.05496203021313,
+      "bearing": 77,
+      "speed_mph": 13,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "1",
+      "vehicle_id": "1826",
+      "lat": 42.311751374218645,
+      "lon": -83.1530718992261,
+      "bearing": 331,
+      "speed_mph": 16,
+      "destination": "Dearborn",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "2",
+      "vehicle_id": "1820",
+      "lat": 42.31800686298097,
+      "lon": -83.19035153187824,
+      "bearing": 67,
+      "speed_mph": 31,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "2",
+      "vehicle_id": "2016",
+      "lat": 42.33141710019015,
+      "lon": -83.07195006193977,
+      "bearing": 270,
+      "speed_mph": 15,
+      "destination": "2 to Fairlane",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "3",
+      "vehicle_id": "2540",
+      "lat": 42.4165752581114,
+      "lon": -83.25780783705473,
+      "bearing": 118,
+      "speed_mph": 0,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "3",
+      "vehicle_id": "1922",
+      "lat": 42.331729310342105,
+      "lon": -83.05307827583192,
+      "bearing": 284,
+      "speed_mph": 0,
+      "destination": "7 Mile",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "4",
+      "vehicle_id": "1724",
+      "lat": 42.33228885061726,
+      "lon": -83.04735076942836,
+      "bearing": 330,
+      "speed_mph": 16,
+      "destination": "Jason Hargrove Transit Center",
+      "updated_at": "2026-11-09T23:08:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "4",
+      "vehicle_id": "1503",
+      "lat": 42.41809158935975,
+      "lon": -83.1055756286856,
+      "bearing": 148,
+      "speed_mph": 7,
+      "destination": "Rosa Parks Transit Center (RPTC)",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "5",
+      "vehicle_id": "1810",
+      "lat": 42.332908,
+      "lon": -83.052414,
+      "bearing": 359,
+      "speed_mph": 0,
+      "destination": "Bel Air Center",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "5",
+      "vehicle_id": "2527",
+      "lat": 42.44801407511764,
+      "lon": -83.02482980509338,
+      "bearing": 195,
+      "speed_mph": 13,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "6",
+      "vehicle_id": "2002",
+      "lat": 42.4485698306044,
+      "lon": -82.968828019324,
+      "bearing": 206,
+      "speed_mph": 22,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "6",
+      "vehicle_id": "2513",
+      "lat": 42.33081187351582,
+      "lon": -83.0567611855085,
+      "bearing": 330,
+      "speed_mph": 0,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "7",
+      "vehicle_id": "2503",
+      "lat": 42.43516882839414,
+      "lon": -82.97545221417137,
+      "bearing": 275,
+      "speed_mph": 20,
+      "destination": "Meijer Old Redford",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "7",
+      "vehicle_id": "2519",
+      "lat": 42.413517,
+      "lon": -83.251511,
+      "bearing": 359,
+      "speed_mph": 0,
+      "destination": "Meijer Old Redford",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "7",
+      "vehicle_id": "2201",
+      "lat": 42.4346679448499,
+      "lon": -82.99593988731696,
+      "bearing": 104,
+      "speed_mph": 25,
+      "destination": "Moross & Mack",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "8",
+      "vehicle_id": "2205",
+      "lat": 42.35205499520376,
+      "lon": -83.07903013433275,
+      "bearing": 252,
+      "speed_mph": 12,
+      "destination": "Telegraph",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "8",
+      "vehicle_id": "2213",
+      "lat": 42.4042959976243,
+      "lon": -82.9347537897761,
+      "bearing": 63,
+      "speed_mph": 25,
+      "destination": "St John Hospital",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "9",
+      "vehicle_id": "1537",
+      "lat": 42.33757551213723,
+      "lon": -83.02411099993809,
+      "bearing": 34,
+      "speed_mph": 24,
+      "destination": "Mack & Alter",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "9",
+      "vehicle_id": "1402",
+      "lat": 42.38696025433069,
+      "lon": -82.94996915383511,
+      "bearing": 77,
+      "speed_mph": 0,
+      "destination": "Mack & Alter",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "9",
+      "vehicle_id": "2204",
+      "lat": 42.36926,
+      "lon": -82.96482,
+      "bearing": 253,
+      "speed_mph": 33,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "9",
+      "vehicle_id": "1803",
+      "lat": 42.3279953,
+      "lon": -83.0467,
+      "bearing": 239,
+      "speed_mph": 20,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "10",
+      "vehicle_id": "2500",
+      "lat": 42.32754612633951,
+      "lon": -83.19555317409863,
+      "bearing": 358,
+      "speed_mph": 20,
+      "destination": "Providence Hospital",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "10",
+      "vehicle_id": "1427",
+      "lat": 42.44968761074341,
+      "lon": -83.20907140371534,
+      "bearing": 135,
+      "speed_mph": 35,
+      "destination": "10 to Fairlane",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "16",
+      "vehicle_id": "2300",
+      "lat": 42.38758419829877,
+      "lon": -83.12948160907258,
+      "bearing": 164,
+      "speed_mph": 25,
+      "destination": "Downtown",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "16",
+      "vehicle_id": "1525",
+      "lat": 42.333,
+      "lon": -83.05271,
+      "bearing": 19,
+      "speed_mph": 0,
+      "destination": "Meijer Old Redford",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "16",
+      "vehicle_id": "1521",
+      "lat": 42.41500189074681,
+      "lon": -83.24742316501504,
+      "bearing": 275,
+      "speed_mph": 0,
+      "destination": "Meijer Old Redford",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "17",
+      "vehicle_id": "2214",
+      "lat": 42.43294438391073,
+      "lon": -82.94861215667324,
+      "bearing": 299,
+      "speed_mph": 28,
+      "destination": "7 Mile & Grand River",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "17",
+      "vehicle_id": "1426",
+      "lat": 42.444902581581246,
+      "lon": -83.20726882390562,
+      "bearing": 267,
+      "speed_mph": 34,
+      "destination": "7 Mile & Grand River",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "17",
+      "vehicle_id": "1428",
+      "lat": 42.446219706256485,
+      "lon": -83.12511729957399,
+      "bearing": 155,
+      "speed_mph": 18,
+      "destination": "St John Hospital",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "19",
+      "vehicle_id": "1523",
+      "lat": 42.332786,
+      "lon": -83.052571,
+      "bearing": 359,
+      "speed_mph": 0,
+      "destination": "Fort & Outer Dr",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "19",
+      "vehicle_id": "1716",
+      "lat": 42.27378864500901,
+      "lon": -83.15718994660557,
+      "bearing": 31,
+      "speed_mph": 24,
+      "destination": "Downtown/Rosa Parks TC",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "27",
+      "vehicle_id": "1528",
+      "lat": 42.32615171690451,
+      "lon": -83.09324644539176,
+      "bearing": 152,
+      "speed_mph": 16,
+      "destination": "27 to Downtown (Rosa Parks Transit Center)",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "30",
+      "vehicle_id": "1535",
+      "lat": 42.43041439908148,
+      "lon": -83.14145990496421,
+      "bearing": 177,
+      "speed_mph": 24,
+      "destination": "Jefferson & Brennan",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "30",
+      "vehicle_id": "2307",
+      "lat": 42.325931415643424,
+      "lon": -83.11671346196007,
+      "bearing": 172,
+      "speed_mph": 0,
+      "destination": "Jefferson & Brennan",
+      "updated_at": "2026-11-09T22:56:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "31",
+      "vehicle_id": "2203",
+      "lat": 42.38656474198626,
+      "lon": -82.95245731731734,
+      "bearing": 257,
+      "speed_mph": 0,
+      "destination": "Rosa Parks Transit Center",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "31",
+      "vehicle_id": "1704",
+      "lat": 42.334811498676565,
+      "lon": -83.05460292032565,
+      "bearing": 337,
+      "speed_mph": 15,
+      "destination": "St John Hospital",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "32",
+      "vehicle_id": "1511",
+      "lat": 42.414474,
+      "lon": -83.276121,
+      "bearing": 359,
+      "speed_mph": 0,
+      "destination": "Moross & Mack",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "32",
+      "vehicle_id": "1903",
+      "lat": 42.417858333333335,
+      "lon": -82.91226,
+      "bearing": 302,
+      "speed_mph": 0,
+      "destination": "Moross & Mack",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "38",
+      "vehicle_id": "1501",
+      "lat": 42.40359676800732,
+      "lon": -83.04961158487363,
+      "bearing": 63,
+      "speed_mph": 0,
+      "destination": "French & Gratiot",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "38",
+      "vehicle_id": "2501",
+      "lat": 42.38290522478134,
+      "lon": -83.10963214910856,
+      "bearing": 357,
+      "speed_mph": 22,
+      "destination": "38 to Middlebelt",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "60",
+      "vehicle_id": "2024",
+      "lat": 42.318548032614906,
+      "lon": -83.22702336153277,
+      "bearing": 106,
+      "speed_mph": 22,
+      "destination": "Fairlane",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "67",
+      "vehicle_id": "2237",
+      "lat": 42.33367920560791,
+      "lon": -83.03546521399991,
+      "bearing": 59,
+      "speed_mph": 20,
+      "destination": "St John Hospital",
+      "updated_at": "2026-11-09T23:10:00"
+    },
+    {
+      "agency": "ddot",
+      "route_id": "67",
+      "vehicle_id": "2230",
+      "lat": 42.41108348727969,
+      "lon": -82.94426049326127,
+      "bearing": 224,
+      "speed_mph": 24,
+      "destination": "Rosa Parks Transit Center",
+      "updated_at": "2026-11-09T23:09:00"
+    },
+    {
+      "agency": "qline",
+      "route_id": "QLINE",
+      "vehicle_id": "287",
+      "lat": 42.34415054321289,
+      "lon": -83.05557250976562,
+      "bearing": 333,
+      "speed_mph": null,
+      "updated_at": "2026-11-10T04:09:35.000Z"
+    },
+    {
+      "agency": "qline",
+      "route_id": "QLINE",
+      "vehicle_id": "289",
+      "lat": 42.33005142211914,
+      "lon": -83.04573059082031,
+      "bearing": 0,
+      "speed_mph": null,
+      "updated_at": "2026-11-10T04:09:35.000Z"
+    },
+    {
+      "agency": "qline",
+      "route_id": "QLINE",
+      "vehicle_id": "291",
+      "lat": 42.37179183959961,
+      "lon": -83.0743408203125,
+      "bearing": 331,
+      "speed_mph": null,
+      "updated_at": "2026-11-10T04:09:34.000Z"
+    },
+    {
+      "agency": "qline",
+      "route_id": "QLINE",
+      "vehicle_id": "292",
+      "lat": 42.35723876953125,
+      "lon": -83.064697265625,
+      "bearing": 154,
+      "speed_mph": null,
+      "updated_at": "2026-11-10T04:09:34.000Z"
+    }
+  ],
+  "sources": {
+    "ddot": {
+      "ok": true,
+      "at": "2026-11-10T04:10:13.030Z",
+      "vehicles": 43,
+      "batches_ok": 4,
+      "batches_failed": 0
+    },
+    "smart": {
+      "ok": true,
+      "at": "2026-11-10T04:10:13.030Z",
+      "vehicles": 115
+    },
+    "qline": {
+      "ok": true,
+      "at": "2026-11-10T04:10:13.030Z",
+      "vehicles": 4
+    }
+  }
+}
