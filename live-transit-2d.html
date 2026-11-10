@@ -45,7 +45,7 @@
   #lineupWrap { position:absolute; left:0; right:0; bottom:26px; height:70px; background:#101010; border-top:1px solid #2a2a2a; z-index:5; }
   #lineupTitle { font-size:11px; letter-spacing:1px; color:#9a9a9a; padding:7px 16px 0 16px; }
   #lineup { position:relative; margin:10px 22px 0 22px; height:26px; border-top:2px solid #3d3d3d; }
-  #lineup .stop { position:absolute; top:-5px; width:8px; height:8px; border-radius:4px; background:#5a5a5a; margin-left:-4px; }
+  #lineup .stop { position:absolute; top:-5px; width:8px; height:9px; border-radius:0; background:#5a5a5a; box-shadow:inset 0 3px 0 #ffffff; margin-left:-4px; }
   #lineup .bus { position:absolute; top:-8px; width:14px; height:14px; border-radius:7px; background:#fff; margin-left:-7px;
     border:2px solid #0b0b0b; }
   #notice { position:absolute; top:66px; left:50%; margin-left:-210px; width:420px; z-index:7;
@@ -547,6 +547,19 @@
     }
     var rec = routeById[selected];
     if (rec) drawPath(rec, 'rgba(255,255,255,0.92)', 2.6);
+    if (rec) {
+      /* I-1 Inversion (P5 transfer): the selected route's stops render
+         on the map as square posts with white caps — the floor view's
+         form of the 3D glyph. Markers only; no new interaction. */
+      for (i = 0; i < rec.stopList.length; i++) {
+        var sp = toScreen(rec.stopList[i].x, rec.stopList[i].z);
+        if (sp[0] < -10 || sp[1] < -10 || sp[0] > canvas.width + 10 || sp[1] > canvas.height + 10) continue;
+        ctx.fillStyle = '#8a8a8a';
+        ctx.fillRect(sp[0] - 3, sp[1] - 2, 6, 7);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(sp[0] - 4, sp[1] - 5, 8, 3);
+      }
+    }
     drawLabels();
     for (var k in vehicles) {
       var v = vehicles[k], p2 = interp(v, now), s = toScreen(p2[0], p2[1]);
@@ -641,7 +654,7 @@
     window.requestAnimationFrame(draw);
   });
 })();
-/* PAGE STAMP — Built: 2026-11-09 21:57 America/Detroit · Agent: Forge · Authorized: J. Spencer Smith, directive of 2026-11-09 (full route browser for the 2D floor view) */
+/* PAGE STAMP — Built: 2026-11-09 23:20 America/Detroit · Agent: Forge · Authorized: J. Spencer Smith, directive of 2026-11-09 (I-1 Inversion for the 2D floor view; Gate 1 pick A) */
 </script>
 </body>
 </html>
